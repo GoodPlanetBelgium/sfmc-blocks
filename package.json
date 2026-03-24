@@ -1,13 +1,19 @@
 {
-  "name": "sfmc-blocks",
-  "version": "1.0.0",
-  "description": "Custom Content Builder blocks for Salesforce Marketing Cloud — GoodPlanet Belgium",
-  "scripts": {
-    "build": "bun build.js",
-    "dev": "bun build.js --dev"
-  },
-  "author": "",
-  "license": "ISC",
-  "private": true,
-  "packageManager": "bun@latest"
+	"name": "sfmc-blocks",
+	"version": "1.0.0",
+	"description": "Custom Content Builder blocks for Salesforce Marketing Cloud — GoodPlanet Belgium",
+	"scripts": {
+		"build": "bun build.ts",
+		"dev": "bun build.ts --dev",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"author": "",
+	"license": "ISC",
+	"private": true,
+	"packageManager": "bun@latest",
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.8"
+	}
 }
