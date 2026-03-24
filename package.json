@@ -3,16 +3,11 @@
   "version": "1.0.0",
   "description": "Custom Content Builder blocks for Salesforce Marketing Cloud — GoodPlanet Belgium",
   "scripts": {
-    "build": "webpack",
-    "dev": "webpack --watch --mode development"
+    "build": "bun build.js",
+    "dev": "bun build.js --dev"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "copy-webpack-plugin": "^14.0.0",
-    "webpack": "^5.105.4",
-    "webpack-cli": "^7.0.2"
-  },
   "private": true,
   "packageManager": "bun@latest"
 }
