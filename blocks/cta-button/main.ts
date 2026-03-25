@@ -56,7 +56,7 @@ if (window.self === window.top) {
       `   style="background-color:${color};border-radius:8px;color:#ffffff;display:inline-block;`,
       "          font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:bold;",
       "          line-height:45px;text-align:center;text-decoration:none;",
-      `          width:${width}px;-webkit-text-size-adjust:none;">`,
+      `          padding:0 ${SIDE_PADDING}px;mso-padding-alt:0px;-webkit-text-size-adjust:none;">`,
       title,
       "</a>",
       "<!--[if mso]>",
