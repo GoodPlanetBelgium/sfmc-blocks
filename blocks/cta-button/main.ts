@@ -28,7 +28,6 @@ if (window.self === window.top) {
   const state: BlockState = { url: "", title: "", color: "#e9860d" };
 
   const SIDE_PADDING = 20;
-  const MIN_WIDTH = 120;
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
   const OUTLOOK_SCALE = 1.25;
 
@@ -38,7 +37,7 @@ if (window.self === window.top) {
   }
 
   function calcButtonWidth(text: string): number {
-    return Math.max(measureTextWidth(text) + SIDE_PADDING * 2, MIN_WIDTH);
+    return measureTextWidth(text) + SIDE_PADDING * 2;
   }
 
   function buildHTML(url: string, title: string, color: string): string {
