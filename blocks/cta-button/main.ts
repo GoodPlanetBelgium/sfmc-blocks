@@ -38,12 +38,12 @@ if (window.self === window.top) {
   }
 
   function calcButtonWidth(text: string): number {
-    const measured = measureTextWidth(text) + SIDE_PADDING * 2;
-    return Math.max(Math.ceil(measured * OUTLOOK_SCALE), MIN_WIDTH);
+    return Math.max(measureTextWidth(text) + SIDE_PADDING * 2, MIN_WIDTH);
   }
 
   function buildHTML(url: string, title: string, color: string): string {
     const width = calcButtonWidth(title);
+    const outlookWidth = Math.ceil(width * OUTLOOK_SCALE);
     return [
       '<div style="margin:20px 0px;">',
       '<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="center">',
@@ -51,7 +51,7 @@ if (window.self === window.top) {
       "<!--[if mso]>",
       '  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"',
       `    href="${url}"`,
-      `    style="height:45px;v-text-anchor:middle;width:${width}px;" arcsize="20%" stroke="f" fillcolor="${color}">`,
+      `    style="height:45px;v-text-anchor:middle;width:${outlookWidth}px;" arcsize="20%" stroke="f" fillcolor="${color}">`,
       "  <w:anchorlock/>",
       "  <center>",
       "<![endif]-->",
