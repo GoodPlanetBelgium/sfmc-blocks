@@ -29,6 +29,8 @@ if (window.self === window.top) {
 
   const SIDE_PADDING = 20;
   const MIN_WIDTH = 120;
+  // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
+  const OUTLOOK_SCALE = 1.15;
 
   function measureTextWidth(text: string): number {
     ctx.font = "bold 18px Arial, Helvetica, sans-serif";
@@ -36,7 +38,8 @@ if (window.self === window.top) {
   }
 
   function calcButtonWidth(text: string): number {
-    return Math.max(measureTextWidth(text) + SIDE_PADDING * 2, MIN_WIDTH);
+    const measured = measureTextWidth(text) + SIDE_PADDING * 2;
+    return Math.max(Math.ceil(measured * OUTLOOK_SCALE), MIN_WIDTH);
   }
 
   function buildHTML(url: string, title: string, color: string): string {
@@ -56,7 +59,7 @@ if (window.self === window.top) {
       `   style="background-color:${color};border-radius:8px;color:#ffffff;display:inline-block;`,
       "          font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:bold;",
       "          line-height:45px;text-align:center;text-decoration:none;",
-      `          padding:0 ${SIDE_PADDING}px;mso-padding-alt:0px;-webkit-text-size-adjust:none;">`,
+      `          width:${width}px;-webkit-text-size-adjust:none;">`,
       title,
       "</a>",
       "<!--[if mso]>",
