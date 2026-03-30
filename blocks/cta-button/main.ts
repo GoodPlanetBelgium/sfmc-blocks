@@ -30,6 +30,8 @@ if (window.self === window.top) {
   const SIDE_PADDING = 20;
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
   const OUTLOOK_SCALE = 1.25;
+  // Must not exceed the 600px email container or Outlook will stretch the entire layout
+  const MAX_OUTLOOK_WIDTH = 580;
 
   function measureTextWidth(text: string): number {
     ctx.font = "bold 16px Verdana, sans-serif";
@@ -42,7 +44,7 @@ if (window.self === window.top) {
 
   function buildHTML(url: string, title: string, color: string): string {
     const width = calcButtonWidth(title);
-    const outlookWidth = Math.ceil(width * OUTLOOK_SCALE);
+    const outlookWidth = Math.min(Math.ceil(width * OUTLOOK_SCALE), MAX_OUTLOOK_WIDTH);
     return [
       '<div style="margin:20px 0px;">',
       '<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="center">',
