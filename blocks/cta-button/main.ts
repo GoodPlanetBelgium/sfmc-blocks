@@ -27,10 +27,10 @@ if (window.self === window.top) {
 
   const state: BlockState = { url: "", title: "", color: "#e9860d" };
 
-  const SIDE_PADDING = 12;
+  const SIDE_PADDING = 20;
   const MIN_WIDTH = 120;
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
-  const OUTLOOK_SCALE = 1.15;
+  const OUTLOOK_SCALE = 1.25;
 
   function measureTextWidth(text: string): number {
     ctx.font = "bold 16px Verdana, sans-serif";
