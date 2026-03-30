@@ -31,7 +31,7 @@ if (window.self === window.top) {
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
   const OUTLOOK_SCALE = 1.5; // Must cover Windows 150% DPI scaling where Outlook doesn't scale VML width proportionally
   // Must not exceed the 600px email container or Outlook will stretch the entire layout
-  const MAX_OUTLOOK_WIDTH = 580;
+  const MAX_OUTLOOK_WIDTH = 600; // Container width — never exceed this or Outlook stretches the layout
 
   function measureTextWidth(text: string): number {
     ctx.font = "bold 16px Verdana, sans-serif";
@@ -55,14 +55,14 @@ if (window.self === window.top) {
       "<!--[if mso]>",
       '  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"',
       `    href="${url}"`,
-      `    style="height:45px;v-text-anchor:middle;width:${outlookWidth}px;" arcsize="20%" stroke="f" fillcolor="${color}">`,
+      `    style="height:60px;v-text-anchor:middle;width:${outlookWidth}px;" arcsize="13%" stroke="f" fillcolor="${color}">`,
       "  <w:anchorlock/>",
       "  <center>",
       "<![endif]-->",
       `<a href="${url}"`,
       `   style="background-color:${color};border-radius:8px;color:#ffffff;display:inline-block;`,
       "          font-family:Verdana,sans-serif;font-size:16px;font-weight:bold;",
-      "          line-height:45px;text-align:center;text-decoration:none;",
+      "          line-height:60px;text-align:center;text-decoration:none;",
       `          width:${width}px;-webkit-text-size-adjust:none;">`,
       title,
       "</a>",
