@@ -27,9 +27,9 @@ if (window.self === window.top) {
 
   const state: BlockState = { url: "", title: "", color: "#e9860d" };
 
-  const SIDE_PADDING = 20;
+  const SIDE_PADDING = 12;
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
-  const OUTLOOK_SCALE = 1.25;
+  const OUTLOOK_SCALE = 1.3;
   // Must not exceed the 600px email container or Outlook will stretch the entire layout
   const MAX_OUTLOOK_WIDTH = 580;
 
@@ -44,7 +44,10 @@ if (window.self === window.top) {
 
   function buildHTML(url: string, title: string, color: string): string {
     const width = calcButtonWidth(title);
-    const outlookWidth = Math.min(Math.ceil(width * OUTLOOK_SCALE), MAX_OUTLOOK_WIDTH);
+    const outlookWidth = Math.min(
+      Math.ceil(width * OUTLOOK_SCALE),
+      MAX_OUTLOOK_WIDTH,
+    );
     return [
       '<div style="margin:20px 0px;">',
       '<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="center">',
