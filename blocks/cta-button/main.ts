@@ -33,7 +33,7 @@ if (window.self === window.top) {
   const OUTLOOK_SCALE = 1.15;
 
   function measureTextWidth(text: string): number {
-    ctx.font = "bold 18px Arial, Helvetica, sans-serif";
+    ctx.font = "bold 18px Verdana, sans-serif";
     return Math.ceil(ctx.measureText(text || "Button").width);
   }
 
@@ -57,7 +57,7 @@ if (window.self === window.top) {
       "<![endif]-->",
       `<a href="${url}"`,
       `   style="background-color:${color};border-radius:8px;color:#ffffff;display:inline-block;`,
-      "          font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:bold;",
+      "          font-family:Verdana,sans-serif;font-size:18px;font-weight:bold;",
       "          line-height:45px;text-align:center;text-decoration:none;",
       `          width:${width}px;-webkit-text-size-adjust:none;">`,
       title,
