@@ -29,7 +29,7 @@ if (window.self === window.top) {
 
   const SIDE_PADDING = 12;
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
-  const OUTLOOK_SCALE = 1.3;
+  const OUTLOOK_SCALE = 1.5; // Must cover Windows 150% DPI scaling where Outlook doesn't scale VML width proportionally
   // Must not exceed the 600px email container or Outlook will stretch the entire layout
   const MAX_OUTLOOK_WIDTH = 580;
 
