@@ -27,7 +27,7 @@ if (window.self === window.top) {
 
   const state: BlockState = { url: "", title: "", color: "#e9860d" };
 
-  const SIDE_PADDING = 20;
+  const SIDE_PADDING = 12;
   const MIN_WIDTH = 120;
   // Outlook/Word GDI font metrics run wider than browser canvas; scale up to prevent text clipping
   const OUTLOOK_SCALE = 1.15;
