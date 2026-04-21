@@ -25,12 +25,14 @@ The official `salesforce-marketingcloud/blocksdk` repo was archived in January 2
 
 **Constructor and whitelist**
 The correct constructor is `new BlockSDK(whitelist, sslOverride)`. The whitelist must include the SFMC parent domains:
+
 ```ts
 const sdk = new BlockSDK(
   ['exacttarget.com', 'marketingcloudapps.com', 'blocktester.herokuapp.com'],
   false
-);
+)
 ```
+
 Without the correct whitelist the SDK silently rejects the handshake and the block appears as raw HTML in Content Builder.
 
 **`setContent` vs `setSuperContent`**
@@ -79,24 +81,28 @@ sfmc-blocks/
 ## Adding a new block
 
 1. Create a new route:
+
    ```
    src/routes/my-new-block/
    └── +page.svelte
    ```
 
 2. In `+page.svelte`, follow the same pattern as `cta-button/+page.svelte`:
+
    ```svelte
    <script lang="ts">
-     import { onMount } from 'svelte';
-     import BlockSDK from '$lib/blocksdk';
+     import { onMount } from 'svelte'
+     import BlockSDK from '$lib/blocksdk'
 
-     let sdk: BlockSDK | null = null;
+     let sdk: BlockSDK | null = null
 
      onMount(() => {
-       if (window.self === window.top) return;
-       sdk = new BlockSDK(['exacttarget.com', 'marketingcloudapps.com'], false);
-       sdk.getData((data) => { /* restore saved state */ });
-     });
+       if (window.self === window.top) return
+       sdk = new BlockSDK(['exacttarget.com', 'marketingcloudapps.com'], false)
+       sdk.getData((data) => {
+         /* restore saved state */
+       })
+     })
    </script>
    ```
 
@@ -105,6 +111,7 @@ sfmc-blocks/
 4. If the block needs static assets (icons), add them to `static/my-new-block/`.
 
 5. Add a link on the index page (`src/routes/+page.svelte`):
+
    ```svelte
    <li><a href="{base}/my-new-block/">my-new-block</a></li>
    ```

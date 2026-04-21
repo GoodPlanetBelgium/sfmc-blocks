@@ -1,146 +1,130 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
-  import { onMount } from "svelte";
-  import { page } from "$app/state";
-  import BlockSDK from "$lib/blocksdk";
+  import type { Snippet } from 'svelte'
+  import { onMount } from 'svelte'
+  import { page } from '$app/state'
+  import BlockSDK from '$lib/blocksdk'
 
   interface Props {
-    storageKey: string;
-    sdk?: BlockSDK | null;
-    onReady: (data: unknown) => void;
-    editor: Snippet;
+    storageKey: string
+    sdk?: BlockSDK | null
+    onReady: (data: unknown) => void
+    editor: Snippet
   }
 
-  let {
-    storageKey,
-    sdk = $bindable<BlockSDK | null>(null),
-    onReady,
-    editor,
-  }: Props = $props();
+  let { storageKey, sdk = $bindable<BlockSDK | null>(null), onReady, editor }: Props = $props()
 
-  let notInIframe = $state(false);
-  let editorFrame = $state<HTMLIFrameElement | null>(null);
-  let emailHTML = $state("");
-  let libsReady = $state(false);
+  let notInIframe = $state(false)
+  let editorFrame = $state<HTMLIFrameElement | null>(null)
+  let emailHTML = $state('')
+  let libsReady = $state(false)
 
   type HL = {
-    codeToHtml: (code: string, opts: { lang: string; theme: string }) => string;
-  };
-  type BF = (html: string, opts?: object) => string;
-  let _highlighter: HL | null = null;
-  let _beautify: BF | null = null;
+    codeToHtml: (code: string, opts: { lang: string; theme: string }) => string
+  }
+  type BF = (html: string, opts?: object) => string
+  let _highlighter: HL | null = null
+  let _beautify: BF | null = null
 
   async function initDevLibs() {
     const [{ createHighlighter }, { html_beautify }] = await Promise.all([
-      import("shiki"),
-      import("js-beautify"),
-    ]);
+      import('shiki'),
+      import('js-beautify')
+    ])
     _highlighter = await createHighlighter({
-      themes: ["dark-plus"],
-      langs: ["html"],
-    });
-    _beautify = html_beautify;
-    libsReady = true;
+      themes: ['dark-plus'],
+      langs: ['html']
+    })
+    _beautify = html_beautify
+    libsReady = true
   }
 
   let highlightedHTML = $derived.by(() => {
-    if (!emailHTML) return "";
+    if (!emailHTML) return ''
     if (!libsReady || !_highlighter || !_beautify) {
-      const escaped = emailHTML
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-      return `<pre class="shiki">${escaped}</pre>`;
+      const escaped = emailHTML.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return `<pre class="shiki">${escaped}</pre>`
     }
     const pretty = _beautify(emailHTML, {
       indent_size: 2,
       wrap_line_length: 0,
       preserve_newlines: false,
-      end_with_newline: false,
-    });
+      end_with_newline: false
+    })
     return _highlighter.codeToHtml(pretty, {
-      lang: "html",
-      theme: "dark-plus",
-    });
-  });
+      lang: 'html',
+      theme: 'dark-plus'
+    })
+  })
 
   function handleDevMessage(event: MessageEvent) {
-    const win = editorFrame?.contentWindow;
-    if (!win || event.source !== win) return;
+    const win = editorFrame?.contentWindow
+    if (!win || event.source !== win) return
 
     const msg = event.data as {
-      method?: string;
-      id?: number;
-      payload?: unknown;
-    };
-    const reply = (payload?: unknown) =>
-      win.postMessage({ id: msg.id, payload }, event.origin);
+      method?: string
+      id?: number
+      payload?: unknown
+    }
+    const reply = (payload?: unknown) => win.postMessage({ id: msg.id, payload }, event.origin)
 
-    if (msg.method === "handShake") {
-      win.postMessage(
-        { method: "handShake", origin: window.location.origin },
-        event.origin,
-      );
-      return;
+    if (msg.method === 'handShake') {
+      win.postMessage({ method: 'handShake', origin: window.location.origin }, event.origin)
+      return
     }
-    if (msg.method === "getData") {
-      const saved = localStorage.getItem(storageKey);
-      reply(saved ? JSON.parse(saved) : null);
-      return;
+    if (msg.method === 'getData') {
+      const saved = localStorage.getItem(storageKey)
+      reply(saved ? JSON.parse(saved) : null)
+      return
     }
-    if (msg.method === "setData") {
-      localStorage.setItem(storageKey, JSON.stringify(msg.payload));
-      reply();
-      return;
+    if (msg.method === 'setData') {
+      localStorage.setItem(storageKey, JSON.stringify(msg.payload))
+      reply()
+      return
     }
-    if (msg.method === "setContent") {
-      emailHTML = msg.payload as string;
-      reply();
-      return;
+    if (msg.method === 'setContent') {
+      emailHTML = msg.payload as string
+      reply()
+      return
     }
-    reply();
+    reply()
   }
 
   async function copyHTML() {
-    await navigator.clipboard.writeText(emailHTML);
+    await navigator.clipboard.writeText(emailHTML)
   }
 
   onMount(() => {
     if (window.self === window.top) {
-      notInIframe = true;
+      notInIframe = true
       if (import.meta.env.DEV) {
-        window.addEventListener("message", handleDevMessage);
-        initDevLibs();
-        return () => window.removeEventListener("message", handleDevMessage);
+        window.addEventListener('message', handleDevMessage)
+        initDevLibs()
+        return () => window.removeEventListener('message', handleDevMessage)
       }
-      return;
+      return
     }
 
     sdk = new BlockSDK(
       [
-        "exacttarget.com",
-        "marketingcloudapps.com",
-        "blocktester.herokuapp.com",
-        ...(import.meta.env.DEV ? ["localhost"] : []),
+        'exacttarget.com',
+        'marketingcloudapps.com',
+        'blocktester.herokuapp.com',
+        ...(import.meta.env.DEV ? ['localhost'] : [])
       ],
-      import.meta.env.DEV as unknown as boolean,
-    );
+      import.meta.env.DEV as unknown as boolean
+    )
 
     sdk.getData((data: unknown) => {
-      onReady(data);
-    });
-  });
+      onReady(data)
+    })
+  })
 </script>
 
 {#if notInIframe}
   {#if import.meta.env.DEV}
-    <div
-      class="flex flex-col h-screen text-[13px] bg-[#1e1e1e] text-[#ccc] font-sans"
-    >
+    <div class="flex flex-col h-screen text-[13px] bg-[#1e1e1e] text-[#ccc] font-sans">
       <div class="flex flex-1 min-h-0">
-        <div
-          class="flex flex-col flex-1 min-w-0 border-r border-[#333] last:border-r-0"
-        >
+        <div class="flex flex-col flex-1 min-w-0 border-r border-[#333] last:border-r-0">
           <div
             class="flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] bg-[#252525] border-b border-[#333] shrink-0"
           >

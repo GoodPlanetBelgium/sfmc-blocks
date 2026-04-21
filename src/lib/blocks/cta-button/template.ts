@@ -1,11 +1,11 @@
 export function buildEmailHTML(
-	url: string,
-	title: string,
-	color: string,
-	width: number,
-	outlookWidth: number,
+  url: string,
+  title: string,
+  color: string,
+  width: number,
+  outlookWidth: number
 ): string {
-	return `<div style="margin:20px 0px;">
+  return `<div style="margin:20px 0px;">
 <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="center">
 <table border="0" cellspacing="0" cellpadding="0" role="presentation"><tr><td>
 <!--[if mso]>
@@ -21,5 +21,5 @@ export function buildEmailHTML(
   </center>
   </v:roundrect>
 <![endif]-->
-</td></tr></table></td></tr></table></div>`;
+</td></tr></table></td></tr></table></div>`
 }

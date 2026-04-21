@@ -1,16 +1,16 @@
-import adapter from "@sveltejs/adapter-static";
+import adapter from '@sveltejs/adapter-static'
 
-const base = process.env.BASE_PATH ?? "";
+const base = process.env.BASE_PATH ?? ''
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
-	kit: {
-		adapter: adapter({
-			pages: "dist",
-			assets: "dist",
-			fallback: null,
-			precompress: false,
-		}),
-		paths: { base },
-	},
-};
+  kit: {
+    adapter: adapter({
+      pages: 'dist',
+      assets: 'dist',
+      fallback: null,
+      precompress: false
+    }),
+    paths: { base }
+  }
+}
