@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Custom Content Builder blocks for Salesforce Marketing Cloud — GoodPlanet Belgium",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && bun scripts/copy-icons.js",
     "dev": "vite dev",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
