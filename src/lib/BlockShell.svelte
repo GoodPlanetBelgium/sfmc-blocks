@@ -8,10 +8,10 @@
     storageKey: string
     sdk?: BlockSDK | null
     onReady: (data: unknown) => void
-    editor: Snippet
+    children: Snippet
   }
 
-  let { storageKey, sdk = $bindable<BlockSDK | null>(null), onReady, editor }: Props = $props()
+  let { storageKey, sdk = $bindable<BlockSDK | null>(null), onReady, children }: Props = $props()
 
   let notInIframe = $state(false)
   let editorFrame = $state<HTMLIFrameElement | null>(null)
@@ -122,11 +122,11 @@
 
 {#if notInIframe}
   {#if import.meta.env.DEV}
-    <div class="flex flex-col h-screen text-[13px] bg-[#1e1e1e] text-[#ccc] font-sans">
+    <div class="flex flex-col h-screen text-[13px] text-[#ccc] font-sans">
       <div class="flex flex-1 min-h-0">
         <div class="flex flex-col flex-1 min-w-0 border-r border-[#333] last:border-r-0">
           <div
-            class="flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] bg-[#252525] border-b border-[#333] shrink-0"
+            class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] border-b border-[#333] bg-[#131313]"
           >
             Block editor
           </div>
@@ -137,35 +137,31 @@
             class="flex-1 w-full border-0 bg-white"
           ></iframe>
         </div>
-        <div
-          class="flex flex-col flex-1 min-w-0 border-r border-[#333] last:border-r-0 bg-[#1e1e1e]"
-        >
+        <div class="flex flex-col flex-1 min-w-0 border-r border-[#333] last:border-r-0">
           <div
-            class="flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] bg-[#252525] border-b border-[#333] shrink-0"
+            class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] border-b border-[#333] bg-[#131313]"
           >
             Email HTML
           </div>
-          <div class="flex-1 overflow-auto code-output">
+          <div class="overflow-auto code-output">
             {#if highlightedHTML}
               {@html highlightedHTML}
             {:else}
               <pre class="shiki">—</pre>
             {/if}
           </div>
+          <div
+            class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] border-b border-[#333] bg-[#131313]"
+          >
+            Browser preview
+          </div>
+          <iframe
+            srcdoc={emailHTML}
+            title="Email HTML preview"
+            sandbox="allow-same-origin"
+            class="flex-1 w-150 border-0 bg-white"
+          ></iframe>
         </div>
-      </div>
-      <div class="flex flex-col shrink-0 h-40 border-t border-[#333] bg-white">
-        <div
-          class="flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] bg-[#252525] border-b border-[#333] shrink-0"
-        >
-          Browser preview (non-MSO only)
-        </div>
-        <iframe
-          srcdoc={emailHTML}
-          title="Email HTML preview"
-          sandbox="allow-same-origin"
-          class="flex-1 w-full border-0"
-        ></iframe>
       </div>
     </div>
   {:else}
@@ -174,5 +170,7 @@
     </p>
   {/if}
 {:else}
-  {@render editor()}
+  <div class="font-sans text-sm text-[#333] bg-white p-4 flex flex-col gap-6">
+    {@render children()}
+  </div>
 {/if}

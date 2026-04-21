@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { base } from '$app/paths'
+  import { base, resolve } from '$app/paths'
 </script>
 
 <svelte:head>
   <title>SFMC Blocks</title>
 </svelte:head>
 
-<h1>SFMC Blocks</h1>
+<h1 class="text-2xl">SFMC Blocks</h1>
 <ul>
-  <li><a href="{base}/cta-button/">cta-button</a></li>
+  <li><a href={resolve('/cta-button')}>cta-button</a></li>
+  <li><a href={resolve('/title')}>title</a></li>
 </ul>
