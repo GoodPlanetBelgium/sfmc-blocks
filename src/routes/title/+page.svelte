@@ -6,27 +6,27 @@
   import { buildEmailHTML } from './template'
 
   let title = $state('')
+  let anchor = $derived(
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+  )
   let color = $state('#e9860d')
   let sdk = $state<BlockSDK | null>(null)
   let prevAnchor = ''
 
-  function toAnchor(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-  }
-
   function updateBlock(): void {
     if (!sdk) return
-    const anchor = toAnchor(title)
-    sdk.setContent(buildEmailHTML(anchor, title, color))
-    sdk.setData({ title, color })
+    const currentAnchor = anchor
+    const currentTitle = title
+    sdk.setContent(buildEmailHTML(currentAnchor, currentTitle, color))
+    sdk.setData({ title: currentTitle, color })
     sdk.getCentralData((cd) => {
       const anchors = (cd.anchors ?? []).filter((a) => a.anchor !== prevAnchor)
-      if (anchor) anchors.push({ anchor, title })
+      if (currentAnchor) anchors.push({ anchor: currentAnchor, title: currentTitle })
       sdk?.setCentralData({ ...cd, anchors })
-      prevAnchor = anchor
+      prevAnchor = currentAnchor
     })
   }
 
@@ -34,7 +34,6 @@
     title
     color
     updateBlock()
-    sdk?.getCentralData((cb) => console.log('CD: ', JSON.stringify(cb, null, 2)))
   })
 
   function onReady(data: unknown): void {
@@ -42,7 +41,7 @@
     if (d?.title) {
       title = d.title
       color = d.color ?? '#e9860d'
-      prevAnchor = toAnchor(d.title)
+      prevAnchor = anchor
     } else {
       updateBlock()
     }
