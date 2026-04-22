@@ -1,11 +1,11 @@
-export function buildEmailHTML(anchor: string, title: string, color: string): string {
-  return `
-<table cellpadding="0" cellspacing="0" width="100%" role="presentation"
-  style="background-color: ${color}; min-width: 100%; " class="stylingblock-content-wrapper">
-  <tr>
-    <td style="padding: 5px 20px; " class="stylingblock-content-wrapper camarker-inner"><a id="${anchor}"
-        name="${anchor}"></a>
+import defaultTemplate from '$lib/defaultTemplate'
 
+export function buildEmailHTML(anchor: string, title: string, color: string): string {
+  return defaultTemplate({
+    padding: '5px 20px',
+    bgColor: color,
+    innerHTML: `
+      <a id="${anchor}" name="${anchor}"></a>
       <!--[if mso]>
       <table role="presentation" border="0" cellpadding="12" cellspacing="0" width="100%">
       <tr>
@@ -22,8 +22,6 @@ export function buildEmailHTML(anchor: string, title: string, color: string): st
         <span style="color:#ffffff;">${title}</span>
       </h1>
       <!--<![endif]-->
-    </td>
-  </tr>
-</table>
 `
+  })
 }

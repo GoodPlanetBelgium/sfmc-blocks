@@ -2,6 +2,7 @@
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
   import BlockShell from '$lib/BlockShell.svelte'
+  import AnchorPicker from '../../components/AnchorPicker.svelte'
   import { COLORS } from '$lib/const'
   import type BlockSDK from '$lib/blocksdk'
   import type { AnchorEntry } from '$lib/blocksdk'
@@ -307,24 +308,9 @@
           class="w-full border border-[#ddd] rounded px-2 py-1.5 text-sm mb-2 focus:outline-none focus:border-[#0078d4]"
           onkeydown={handleLinkKeyDown}
         />
-        {#if availableAnchors.length > 0}
-          <div class="mb-3">
-            <p class="text-[11px] text-[#888] mb-1">Of kies een anker:</p>
-            <div class="flex flex-wrap gap-1">
-              {#each availableAnchors as a (a.anchor)}
-                <button
-                  class="px-2 py-0.5 text-xs rounded border cursor-pointer transition-colors duration-100 {linkUrl ===
-                  '#' + a.anchor
-                    ? 'bg-[#0078d4] text-white border-[#0078d4]'
-                    : 'border-[#ddd] hover:bg-[#eee]'}"
-                  onclick={() => (linkUrl = '#' + a.anchor)}>{a.title}</button
-                >
-              {/each}
-            </div>
-          </div>
-        {:else}
-          <div class="mb-3"></div>
-        {/if}
+        <div class="mb-3">
+          <AnchorPicker anchors={availableAnchors} bind:value={linkUrl} />
+        </div>
         <div class="flex items-center gap-2">
           {#if linkUrl}
             <button

@@ -1,4 +1,5 @@
-import { COLORS, namedColors } from '$lib/const'
+import { namedColors } from '$lib/const'
+import defaultTemplate from '$lib/defaultTemplate'
 
 const H1_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;'
@@ -8,7 +9,6 @@ const BODY_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4'
 
 export function buildEmailHTML(editorHTML: string): string {
-  const padding = '12px 0px'
   if (!editorHTML.trim()) return ''
   const parser = new DOMParser()
   const doc = parser.parseFromString(`<body>${editorHTML}</body>`, 'text/html')
@@ -50,8 +50,8 @@ export function buildEmailHTML(editorHTML: string): string {
   }
 
   flushBody()
-  const inner = parts.join('\n')
-  return `<table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="background-color: transparent; min-width: 100%; " class="stylingblock-content-wrapper"><tr><td style="padding: ${padding}; " class="stylingblock-content-wrapper camarker-inner">${inner}</td></tr></table>`
+  const innerHTML = parts.join('\n')
+  return defaultTemplate({ innerHTML })
 }
 
 function serializeInline(el: Element): string {
