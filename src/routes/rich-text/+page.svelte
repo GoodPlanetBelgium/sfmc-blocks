@@ -123,8 +123,14 @@
       const anchor = sel.anchorNode?.parentElement?.closest('a')
       linkUrl = anchor?.getAttribute('href') ?? ''
     }
+    availableAnchors = []
     sdk?.getCentralData((cd) => {
-      availableAnchors = cd.anchors ?? []
+      const seen = new Set<string>()
+      availableAnchors = (cd.anchors ?? []).filter((a) => {
+        if (seen.has(a.anchor)) return false
+        seen.add(a.anchor)
+        return true
+      })
     })
     showLinkDialog = true
     await tick()
@@ -169,6 +175,7 @@
     showLinkDialog = false
     linkUrl = ''
     savedRange = null
+    availableAnchors = []
   }
 
   function handleLinkKeyDown(e: KeyboardEvent): void {
@@ -177,6 +184,11 @@
       applyLink()
     }
     if (e.key === 'Escape') closeLinkDialog()
+  }
+
+  function handleEditorClick(e: MouseEvent): void {
+    const anchor = (e.target as Element).closest('a')
+    if (anchor) e.preventDefault()
   }
 
   function btnClass(active: boolean): string {
@@ -263,14 +275,17 @@
       </button>
     </div>
 
+    <!-- svelte-ignore a11y_click_events_have_key_events a11y_interactive_supports_focus -->
     <div
       bind:this={editorEl}
       contenteditable="true"
       role="textbox"
       aria-multiline="true"
+      tabindex="0"
       class="rich-text-editor min-h-45 border border-[#ddd] rounded p-3 focus:outline-none focus:border-[#0078d4] text-sm"
       oninput={handleInput}
       onpaste={handlePaste}
+      onclick={handleEditorClick}
     ></div>
   </div>
 
