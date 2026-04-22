@@ -1,17 +1,11 @@
 <script lang="ts">
+  import { COLORS } from '$lib/const'
+
   interface Props {
     value: string
   }
 
   let { value = $bindable() }: Props = $props()
-
-  const COLORS = [
-    { id: 'c-orange', value: '#e9860d', label: 'Oranje' },
-    { id: 'c-lightgreen', value: '#afca14', label: 'Lichtgroen' },
-    { id: 'c-pink', value: '#e72d52', label: 'Roze' },
-    { id: 'c-green', value: '#29af8a', label: 'Groen' },
-    { id: 'c-blue', value: '#1895d3', label: 'Blauw' }
-  ]
 </script>
 
 <fieldset class="mb-3.5 border-0 p-0">

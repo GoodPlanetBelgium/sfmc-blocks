@@ -10,4 +10,5 @@
 <ul>
   <li><a href={resolve('/cta-button')}>cta-button</a></li>
   <li><a href={resolve('/title')}>title</a></li>
+  <li><a href={resolve('/rich-text')}>rich-text</a></li>
 </ul>

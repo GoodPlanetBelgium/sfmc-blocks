@@ -5,9 +5,7 @@ const iconsDir = 'src/icons'
 const distDir = 'dist'
 
 const icons = readdirSync(iconsDir)
-const blocks = readdirSync(distDir).filter((entry) =>
-  statSync(join(distDir, entry)).isDirectory()
-)
+const blocks = readdirSync(distDir).filter((entry) => statSync(join(distDir, entry)).isDirectory())
 
 for (const block of blocks) {
   for (const icon of icons) {
