@@ -134,7 +134,7 @@
   {#if import.meta.env.DEV}
     <div class="flex flex-col h-screen text-[13px] text-[#ccc] font-sans">
       <div class="flex flex-1 min-h-0">
-        <div class="flex flex-col flex-1 min-w-0 border-r border-[#333] last:border-r-0">
+        <div class="flex flex-col border-r border-[#333] last:border-r-0 w-[423px]">
           <div
             class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888] border-b border-[#333] bg-[#131313]"
           >

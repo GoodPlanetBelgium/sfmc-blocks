@@ -272,7 +272,7 @@
 
   function btnClass(active: boolean): string {
     const base =
-      'px-2 py-1 text-xs rounded border cursor-pointer font-mono transition-colors duration-100'
+      'px-1 py-1 text-xs rounded border cursor-pointer font-mono transition-colors duration-100'
     return active
       ? `${base} bg-[#0078d4] text-white border-[#0078d4]`
       : `${base} border-transparent hover:bg-[#eee] hover:border-[#ddd]`
