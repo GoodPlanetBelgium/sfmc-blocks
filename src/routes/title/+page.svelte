@@ -34,6 +34,7 @@
     title
     color
     updateBlock()
+    sdk?.getCentralData((cb) => console.log('CD: ', JSON.stringify(cb, null, 2)))
   })
 
   function onReady(data: unknown): void {
