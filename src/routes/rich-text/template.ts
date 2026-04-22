@@ -37,6 +37,12 @@ export function buildEmailHTML(editorHTML: string): string {
     } else if (tag === 'h2') {
       flushBody()
       parts.push(`<h2 style="${H2_STYLE}">\n ${serializeInline(el)}</h2>`)
+    } else if (tag === 'ul') {
+      flushBody()
+      const items = Array.from(el.children)
+        .filter((child) => child.tagName.toLowerCase() === 'li')
+        .map((li) => `  <li>${serializeInline(li)}</li>`)
+      parts.push(`<ul>\n${items.join('\n')}\n</ul>`)
     } else if (tag === 'p' || tag === 'div') {
       const content = serializeInline(el)
       bodyLines.push(content === '<br>' || content === '' ? '' : content)

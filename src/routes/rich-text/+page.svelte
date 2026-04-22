@@ -29,8 +29,9 @@
       while (node && node !== editorEl) {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const tag = (node as Element).tagName.toLowerCase()
-          if (tag === 'h1' || tag === 'h2' || tag === 'p' || tag === 'div') {
-            activeFormat = tag === 'div' ? 'p' : tag
+          if (tag === 'h1' || tag === 'h2' || tag === 'p' || tag === 'div' || tag === 'li') {
+            if (tag === 'li') activeFormat = 'ul'
+            else activeFormat = tag === 'div' ? 'p' : tag
             break
           }
         }
@@ -85,8 +86,85 @@
   }
 
   function applyFormat(tag: string): void {
-    document.execCommand('formatBlock', false, tag)
+    if (activeFormat === 'ul') {
+      convertListToBlocks(tag)
+    } else {
+      document.execCommand('formatBlock', false, tag)
+    }
     activeFormat = tag
+    updateBlock()
+  }
+
+  function convertBlocksToList(): void {
+    if (!editorEl) return
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+    const range = sel.getRangeAt(0)
+
+    let nodes = Array.from(editorEl.childNodes).filter((child) => range.intersectsNode(child))
+    if (nodes.length === 0) {
+      let node: Node | null = sel.anchorNode
+      while (node && node.parentNode !== editorEl) node = node.parentNode
+      if (node && node !== editorEl) nodes = [node as ChildNode]
+    }
+    if (nodes.length === 0) return
+
+    const ul = document.createElement('ul')
+    for (const child of nodes) {
+      const li = document.createElement('li')
+      li.innerHTML =
+        child.nodeType === Node.TEXT_NODE ? (child.textContent ?? '') : (child as Element).innerHTML
+      ul.appendChild(li)
+    }
+    nodes[0].parentNode!.insertBefore(ul, nodes[0])
+    for (const child of nodes) child.parentNode?.removeChild(child)
+
+    const newRange = document.createRange()
+    newRange.selectNodeContents(ul.lastElementChild ?? ul)
+    newRange.collapse(false)
+    sel.removeAllRanges()
+    sel.addRange(newRange)
+  }
+
+  function convertListToBlocks(tag: string): void {
+    if (!editorEl) return
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+
+    let node: Node | null = sel.anchorNode
+    let ul: Element | null = null
+    while (node && node !== editorEl) {
+      if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName.toLowerCase() === 'ul') {
+        ul = node as Element
+        break
+      }
+      node = node.parentNode
+    }
+    if (!ul) return
+
+    const fragment = document.createDocumentFragment()
+    let lastEl: Element | null = null
+    for (const li of Array.from(ul.children)) {
+      const newEl = document.createElement(tag)
+      newEl.innerHTML = li.innerHTML
+      fragment.appendChild(newEl)
+      lastEl = newEl
+    }
+    ul.parentNode!.replaceChild(fragment, ul)
+
+    if (lastEl) {
+      const newRange = document.createRange()
+      newRange.selectNodeContents(lastEl)
+      newRange.collapse(false)
+      sel.removeAllRanges()
+      sel.addRange(newRange)
+    }
+  }
+
+  function applyList(): void {
+    if (activeFormat === 'ul') return
+    convertBlocksToList()
+    activeFormat = 'ul'
     updateBlock()
   }
 
@@ -223,6 +301,11 @@
         onmousedown={(e) => e.preventDefault()}
         onclick={() => applyFormat('p')}>Body</button
       >
+      <button
+        class={btnClass(activeFormat === 'ul')}
+        onmousedown={(e) => e.preventDefault()}
+        onclick={applyList}>List</button
+      >
       <span class="w-px self-stretch bg-[#ddd] mx-0.5"></span>
       <button class={btnClass(isBold)} onmousedown={(e) => e.preventDefault()} onclick={applyBold}
         ><strong>B</strong></button
@@ -353,5 +436,16 @@
   :global(.rich-text-editor a) {
     color: #1895d3;
     text-decoration: none;
+  }
+  :global(.rich-text-editor ul) {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 6px 0;
+  }
+  :global(.rich-text-editor li) {
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 2px 0;
   }
 </style>
