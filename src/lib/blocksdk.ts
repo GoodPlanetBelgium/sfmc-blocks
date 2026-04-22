@@ -10,6 +10,15 @@
 
 type Callback<T = unknown> = (payload: T) => void
 
+export interface AnchorEntry {
+  anchor: string
+  title: string
+}
+
+export interface CentralData {
+  anchors?: AnchorEntry[]
+}
+
 interface SDKConfig {
   onEditClose?: () => void
 }
@@ -96,8 +105,8 @@ class BlockSDK {
     }
   }
 
-  getCentralData(cb?: Callback): void {
-    this.execute('getCentralData', { success: cb })
+  getCentralData(cb?: Callback<CentralData>): void {
+    this.execute('getCentralData', { success: (data) => cb?.((data as CentralData) ?? {}) })
   }
   getContent(cb?: Callback): void {
     this.execute('getContent', { success: cb })
@@ -115,7 +124,7 @@ class BlockSDK {
   setBlockEditorWidth(value: unknown, cb?: Callback): void {
     this.execute('setBlockEditorWidth', { data: value, success: cb })
   }
-  setCentralData(dataObj: unknown, cb?: Callback): void {
+  setCentralData(dataObj: CentralData, cb?: Callback): void {
     this.execute('setCentralData', { data: dataObj, success: cb })
   }
   setContent(content: string, cb?: Callback): void {

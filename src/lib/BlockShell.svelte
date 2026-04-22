@@ -81,6 +81,16 @@
       reply()
       return
     }
+    if (msg.method === 'getCentralData') {
+      const saved = localStorage.getItem('sfmc-dev-central-data')
+      reply(saved ? JSON.parse(saved) : null)
+      return
+    }
+    if (msg.method === 'setCentralData') {
+      localStorage.setItem('sfmc-dev-central-data', JSON.stringify(msg.payload))
+      reply()
+      return
+    }
     if (msg.method === 'setContent') {
       emailHTML = msg.payload as string
       reply()
