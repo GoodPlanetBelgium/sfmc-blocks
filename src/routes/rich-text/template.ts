@@ -7,6 +7,8 @@ const H2_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:16px;font-style:normal;font-weight:bold;line-height:1.4;'
 const BODY_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4'
+const LI_STYLE =
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;margin:0;mso-line-height-rule:exactly;'
 
 export function buildEmailHTML(editorHTML: string): string {
   if (!editorHTML.trim()) return ''
@@ -41,7 +43,7 @@ export function buildEmailHTML(editorHTML: string): string {
       flushBody()
       const items = Array.from(el.children)
         .filter((child) => child.tagName.toLowerCase() === 'li')
-        .map((li) => `  <li>${serializeInline(li)}</li>`)
+        .map((li) => `  <li style="${LI_STYLE}"><span style="color:#181818;">${serializeInline(li)}</span></li>`)
       parts.push(`<ul>\n${items.join('\n')}\n</ul>`)
     } else if (tag === 'p' || tag === 'div') {
       const content = serializeInline(el)
