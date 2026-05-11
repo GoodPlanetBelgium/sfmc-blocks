@@ -43,7 +43,10 @@ export function buildEmailHTML(editorHTML: string): string {
       flushBody()
       const items = Array.from(el.children)
         .filter((child) => child.tagName.toLowerCase() === 'li')
-        .map((li) => `  <li style="${LI_STYLE}"><span style="color:#181818;">${serializeInline(li)}</span></li>`)
+        .map(
+          (li) =>
+            `  <li style="${LI_STYLE}"><span style="color:#181818;">${serializeInline(li)}</span></li>`
+        )
       parts.push(`<ul>\n${items.join('\n')}\n</ul>`)
     } else if (tag === 'p' || tag === 'div') {
       const content = serializeInline(el)
@@ -102,11 +105,11 @@ function formatLink(href: string, text: string): string {
   const isMailto = href.startsWith('mailto:') || (!href.startsWith('http') && href.includes('@'))
   if (isMailto) {
     const email = href.replace(/^mailto:/i, '').split('?')[0]
-    return `<a alias="${email}" conversion="false" data-linkto="mailto:" href="mailto:${email}?subject=" style="color:${namedColors.blue};text-decoration:none;" title="${email}">${text}</a>`
+    return `<a alias="${email}" data-linkto="mailto:" href="mailto:${email}?subject=" style="color:${namedColors.blue};text-decoration:none;" title="${email}">${text}</a>`
   }
   const url = href.startsWith('http') ? href : `https://${href}`
   const protocol = url.split(':')[0] + ':'
-  return `<a alias='${url}' conversion="false" data-linkto="${protocol}" href='${url}' style="color:${namedColors.blue};text-decoration:none;" title='${url}'>${text}</a>`
+  return `<a alias='${url}' data-linkto="${protocol}" href='${url}' style="color:${namedColors.blue};text-decoration:none;" title='${url}'>${text}</a>`
 }
 
 function toHex(color: string): string {
