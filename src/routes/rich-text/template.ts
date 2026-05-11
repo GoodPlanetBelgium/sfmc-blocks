@@ -77,6 +77,9 @@ function serializeNode(node: Node): string {
     case 'b':
     case 'strong':
       return `<b>${serializeInline(el)}</b>`
+    case 'i':
+    case 'em':
+      return `<i>${serializeInline(el)}</i>`
     case 'span': {
       const color = (el as HTMLElement).style?.color
       return color

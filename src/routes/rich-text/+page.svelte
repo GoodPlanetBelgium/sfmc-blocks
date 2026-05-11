@@ -16,6 +16,7 @@
   let savedRange: Range | null = null
   let activeFormat = $state('')
   let isBold = $state(false)
+  let isItalic = $state(false)
   let availableAnchors = $state<AnchorEntry[]>([])
 
   $effect(() => {
@@ -38,6 +39,7 @@
         node = node.parentNode
       }
       isBold = document.queryCommandState('bold')
+      isItalic = document.queryCommandState('italic')
     }
     document.addEventListener('selectionchange', onSelectionChange)
     return () => document.removeEventListener('selectionchange', onSelectionChange)
@@ -56,9 +58,12 @@
     sdk.setData({ html: editorEl.innerHTML })
   }
 
+  const DEFAULT_HTML =
+    '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
+
   function onReady(data: unknown): void {
     const d = data as { html?: string } | null
-    if (d?.html && editorEl) editorEl.innerHTML = d.html
+    if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
     updateBlock()
   }
 
@@ -168,8 +173,33 @@
     updateBlock()
   }
 
+  function selectFormattingNode(tags: string[]): void {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return
+    let node: Node | null = sel.anchorNode
+    while (node && node !== editorEl) {
+      if (node.nodeType === Node.ELEMENT_NODE && tags.includes((node as Element).tagName.toLowerCase())) {
+        const range = document.createRange()
+        range.selectNodeContents(node)
+        sel.removeAllRanges()
+        sel.addRange(range)
+        return
+      }
+      node = node.parentNode
+    }
+  }
+
   function applyBold(): void {
+    if (isBold) selectFormattingNode(['b', 'strong'])
     document.execCommand('bold')
+    isBold = document.queryCommandState('bold')
+    updateBlock()
+  }
+
+  function applyItalic(): void {
+    if (isItalic) selectFormattingNode(['i', 'em'])
+    document.execCommand('italic')
+    isItalic = document.queryCommandState('italic')
     updateBlock()
   }
 
@@ -178,19 +208,40 @@
     updateBlock()
   }
 
+  function stripColorFromEl(el: Element): void {
+    const htmlEl = el as HTMLElement
+    htmlEl.style.removeProperty('color')
+    el.removeAttribute('color')
+    if (el.tagName === 'SPAN' && !htmlEl.style.cssText.trim() && el.attributes.length === 0) {
+      el.replaceWith(...Array.from(el.childNodes))
+    }
+  }
+
   function removeColor(): void {
     const sel = window.getSelection()
-    if (!sel || !sel.rangeCount || sel.isCollapsed || !editorEl) return
+    if (!sel || !sel.rangeCount || !editorEl) return
+    if (sel.isCollapsed) {
+      let node: Node | null = sel.anchorNode
+      while (node && node !== editorEl) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as Element
+          const htmlEl = el as HTMLElement
+          if (htmlEl.style?.color || el.getAttribute('color')) {
+            stripColorFromEl(el)
+            updateBlock()
+            return
+          }
+        }
+        node = node.parentNode
+      }
+      return
+    }
     const range = sel.getRangeAt(0)
     for (const el of Array.from(editorEl.querySelectorAll('span, font[color]'))) {
       if (!range.intersectsNode(el)) continue
       const htmlEl = el as HTMLElement
       if (!htmlEl.style.color && !el.getAttribute('color')) continue
-      htmlEl.style.removeProperty('color')
-      el.removeAttribute('color')
-      if (el.tagName === 'SPAN' && !htmlEl.style.cssText.trim() && el.attributes.length === 0) {
-        el.replaceWith(...Array.from(el.childNodes))
-      }
+      stripColorFromEl(el)
     }
     updateBlock()
   }
@@ -309,6 +360,11 @@
       <span class="w-px self-stretch bg-[#ddd] mx-0.5"></span>
       <button class={btnClass(isBold)} onmousedown={(e) => e.preventDefault()} onclick={applyBold}
         ><strong>B</strong></button
+      >
+      <button
+        class={btnClass(isItalic)}
+        onmousedown={(e) => e.preventDefault()}
+        onclick={applyItalic}><em>I</em></button
       >
       <button class={btnClass(false)} aria-label="Link invoegen" onclick={openLinkDialog}>
         <svg
