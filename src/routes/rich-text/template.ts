@@ -108,8 +108,9 @@ function formatLink(href: string, text: string): string {
     return `<a alias="${email}" data-linkto="mailto:" href="mailto:${email}?subject=" style="color:${namedColors.blue};text-decoration:none;" title="${email}">${text}</a>`
   }
   const url = href.startsWith('http') ? href : `https://${href}`
+  const safeUrl = url.replace(/"/g, "'")
   const protocol = url.split(':')[0] + ':'
-  return `<a alias='${url}' data-linkto="${protocol}" href='${url}' style="color:${namedColors.blue};text-decoration:none;" title='${url}'>${text}</a>`
+  return `<a alias="${safeUrl}" data-linkto="${protocol}" href="${safeUrl}" style="color:${namedColors.blue};text-decoration:none;" title="${safeUrl}">${text}</a>`
 }
 
 function toHex(color: string): string {
