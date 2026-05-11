@@ -106,7 +106,7 @@ function formatLink(href: string, text: string): string {
   }
   const url = href.startsWith('http') ? href : `https://${href}`
   const protocol = url.split(':')[0] + ':'
-  return `<a alias="${url}" conversion="false" data-linkto="${protocol}" href="${url}" style="color:${namedColors.blue};text-decoration:none;" title="${url}">${text}</a>`
+  return `<a alias='${url}' conversion="false" data-linkto="${protocol}" href='${url}' style="color:${namedColors.blue};text-decoration:none;" title='${url}'>${text}</a>`
 }
 
 function toHex(color: string): string {
