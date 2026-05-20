@@ -1,0 +1,105 @@
+%%[
+/* Get the language value from the sendable DE or subscriber attribute */
+VAR @lang, @unsubscribeText, @privacyPolicyLink, @privacyPolicyText
+
+SET @lang = AttributeValue("Language")
+IF @lang == "" THEN SET @lang = AttributeValue("Language__c") ENDIF
+IF @lang == "" THEN SET @lang = AttributeValue("C_Language__c") ENDIF
+
+/* Normalize the case */
+SET @lang = LOWERCASE(@lang)
+
+/* Set the correct unsubscribe text based on language */
+IF @lang == "nl" THEN
+SET @unsubscribeText = "Uitschrijven"
+SET @privacyPolicyLink = "https://www.goodplanet.be/docs/gpb/05_Privacyverklaring-GoodPlanet-NL_20181017.pdf"
+SET @privacyPolicyText = "Privacybeleid"
+ELSEIF @lang == "fr" THEN
+SET @unsubscribeText = "Se désinscrire"
+SET @privacyPolicyLink = "https://www.goodplanet.be/docs/gpb/09_Privacyverklaring-GoodPlanet-FR_20181017.pdf"
+SET @privacyPolicyText = "Déclaration de confidentialité"
+ELSE
+SET @unsubscribeText = "Update profile / Unsubscribe"
+SET @privacyPolicyLink = "https://www.goodplanet.be/docs/gpb/05_Privacyverklaring-GoodPlanet-NL_20181017.pdf"
+SET @privacyPolicyText = "Privacy Policy"
+ENDIF
+]%%
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff;">
+  <!-- FOOTER CONTENT -->
+  <tr>
+    <td align="center" style="padding: 30px 0;">
+      <!--[if mso]>
+          <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center">
+            <tr>
+          <![endif]-->
+
+      <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin:0 auto;">
+        <tr>
+          <td align="center" valign="middle" style="padding:0 8px;">
+            <a href="https://www.facebook.com/GoodPlanetBelgium" target="_blank" aria-label="Facebook"
+              style="text-decoration:none; display:inline-block; padding:8px;">
+              <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-color-facebook-48.png" width="24"
+                height="24" alt="Facebook" border="0"
+                style="display:block; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; border:0; height:24px; width:24px;">
+            </a>
+          </td>
+          <td align="center" valign="middle" style="padding:0 8px;">
+            <a href="https://www.instagram.com/goodplanetbelgium/" target="_blank" aria-label="Instagram"
+              style="text-decoration:none; display:inline-block; padding:8px;">
+              <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-color-instagram-48.png"
+                width="24" height="24" alt="Instagram" border="0"
+                style="display:block; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; border:0; height:24px; width:24px;">
+            </a>
+          </td>
+          <td align="center" valign="middle" style="padding:0 8px;">
+            <a href="https://nl.linkedin.com/company/goodplanet-belgium" target="_blank" aria-label="LinkedIn"
+              style="text-decoration:none; display:inline-block; padding:8px;">
+              <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-color-linkedin-48.png" width="24"
+                height="24" alt="LinkedIn" border="0"
+                style="display:block; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; border:0; height:24px; width:24px;">
+            </a>
+          </td>
+          <td align="center" valign="middle" style="padding:0 8px;">
+            <a href="https://www.goodplanet.be/" target="_blank" aria-label="Website"
+              style="text-decoration:none; display:inline-block; padding:8px;">
+              <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/outline-color-link-48.png" width="24"
+                height="24" alt="Website" border="0"
+                style="display:block; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; border:0; height:24px; width:24px;">
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <!--[if mso]>
+            </tr>
+          </table>
+          <![endif]-->
+    </td>
+  </tr>
+  <tr style="background:#1794d2;">
+    <td align="center" valign="top" width="100%">
+      <table class="container" cellpadding="0" cellspacing="0" width="600">
+        <tr>
+          <td align="center"
+            style="font-family: Verdana, Helvetica, Arial, sans-serif; font-size: 11px; color: #fff; padding:60px 0px;">
+            %%Member_Busname%% | <a href="https://www.goodplanet.be/" target="_blank"
+              style="color: #fff; text-decoration: none;">www.goodplanet.be</a>
+            <br>
+            %%Member_Addr%%, %%Member_PostalCode%% %%Member_City%%, %%Member_Country%%
+            <br>
+            RPR %%Member_State%% - 0462.923.392
+            <br>
+            <br>
+            %%[ if 0 == 1 then ]%%%%profile_center_url%%%%[endif]%%
+            <a href="%%=RedirectTo(@privacyPolicyLink)=%%" alias="Privacy Policy" target="_blank"
+              style="font-size:10px; color: #fff; text-decoration: none; font-weight:bold;">%%=v(@privacyPolicyText)=%%</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://newsletter.goodplanet.be/update/%%_subscriberkey%%/"
+              alias="Update profile or unsubscribe" target="_blank"
+              style="font-size:10px; color: #fff; text-decoration: none; font-weight:bold;">%%=v(@unsubscribeText)=%%</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
