@@ -62,7 +62,7 @@ export function buildEmailHTML(editorHTML: string): string {
 
   flushBody()
   const innerHTML = parts.join('\n')
-  return defaultTemplate({ innerHTML })
+  return defaultTemplate({ innerHTML, padding: '0' })
 }
 
 function serializeInline(el: Element): string {
