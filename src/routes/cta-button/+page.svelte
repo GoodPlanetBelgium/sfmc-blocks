@@ -53,7 +53,7 @@
   <title>CTA Button Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:cta-button" bind:sdk {onReady}>
+<BlockShell storageKey="sfmc-dev-block-data:cta-button" bind:sdk {onReady} tabs={[]}>
   <TextInput label="url" placeholder="https://..." bind:value={url} />
   <TextInput label="Button tekst" bind:value={title} />
   <ColorPicker bind:value={color} />

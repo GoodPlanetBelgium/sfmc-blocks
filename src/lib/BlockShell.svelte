@@ -2,16 +2,23 @@
   import type { Snippet } from 'svelte'
   import { onMount } from 'svelte'
   import { page } from '$app/state'
-  import BlockSDK from '$lib/blocksdk'
+  import BlockSDK, { type BlockSDKTab } from '$lib/blocksdk'
 
   interface Props {
     storageKey: string
     sdk?: BlockSDK | null
     onReady: (data: unknown) => void
     children: Snippet
+    tabs?: BlockSDKTab[]
   }
 
-  let { storageKey, sdk = $bindable<BlockSDK | null>(null), onReady, children }: Props = $props()
+  let {
+    storageKey,
+    sdk = $bindable<BlockSDK | null>(null),
+    onReady,
+    children,
+    tabs = []
+  }: Props = $props()
 
   let notInIframe = $state(false)
   let editorFrame = $state<HTMLIFrameElement | null>(null)
@@ -115,6 +122,7 @@
     }
 
     sdk = new BlockSDK(
+      { tabs },
       [
         'exacttarget.com',
         'marketingcloudapps.com',

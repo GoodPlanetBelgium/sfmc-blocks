@@ -48,7 +48,7 @@
   }
 </script>
 
-<BlockShell storageKey="sfmc-dev-block-data:title" bind:sdk {onReady}>
+<BlockShell storageKey="sfmc-dev-block-data:title" bind:sdk {onReady} tabs={[]}>
   <TextInput label="Title" bind:value={title} />
   <ColorPicker bind:value={color} />
 </BlockShell>

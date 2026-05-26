@@ -45,7 +45,7 @@
   <title>Table of Contents Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:table-of-contents" bind:sdk {onReady}>
+<BlockShell storageKey="sfmc-dev-block-data:table-of-contents" bind:sdk {onReady} tabs={[]}>
   <div class="flex flex-col gap-3">
     {#each items as item, i (i)}
       <div class="flex flex-col gap-2 p-3 border border-[#e0e0e0] rounded bg-[#fafafa]">

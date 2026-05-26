@@ -19,8 +19,15 @@ export interface CentralData {
   anchors?: AnchorEntry[]
 }
 
+export type BlockSDKTab =
+  | 'stylingblock'
+  | 'htmlblock'
+  | { key: string; name: string | Record<string, string>; url: string }
+
 interface SDKConfig {
   onEditClose?: () => void
+  tabs?: BlockSDKTab[]
+  blockEditorWidth?: number | string
 }
 
 interface PendingMessage {

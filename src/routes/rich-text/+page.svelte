@@ -178,7 +178,10 @@
     if (!sel || sel.rangeCount === 0 || !sel.isCollapsed) return
     let node: Node | null = sel.anchorNode
     while (node && node !== editorEl) {
-      if (node.nodeType === Node.ELEMENT_NODE && tags.includes((node as Element).tagName.toLowerCase())) {
+      if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        tags.includes((node as Element).tagName.toLowerCase())
+      ) {
         const range = document.createRange()
         range.selectNodeContents(node)
         sel.removeAllRanges()
@@ -334,7 +337,7 @@
   <title>Rich Text Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady}>
+<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady} tabs={['stylingblock']}>
   <div class="flex flex-col gap-2">
     <div class="flex flex-wrap items-center gap-1 p-1.5 border border-[#ddd] rounded bg-[#f8f8f8]">
       <button
