@@ -1,8 +1,9 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
+  import { buildSuperContent, stripAmpscript, computeFilterLabel } from '$lib/filterAmpscript'
   import BlockShell from '$lib/BlockShell.svelte'
-  import FilterSettings from '$lib/FilterSettings.svelte'
+  import FilterSettings from '../../components/FilterSettings.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
   import { COLORS } from '$lib/const'
   import type BlockSDK from '$lib/blocksdk'
@@ -58,9 +59,18 @@
   function updateBlock(persist = true): void {
     if (!sdk || !editorEl) return
     const html = buildEmailHTML(editorEl.innerHTML, filterState)
+    const snap = $state.snapshot(filterState) as FilterState
     sdk.setContent(html)
-    sdk.setSuperContent(html.replace(/%%[\[=][\s\S]*?[\]=]%%/g, ''))
-    if (persist) sdk.setData({ html: editorEl.innerHTML, filterState: $state.snapshot(filterState) })
+    if (import.meta.env.DEV) {
+      sdk.setSuperContent(stripAmpscript(html))
+      window.parent.postMessage(
+        { method: 'setFilterBadge', payload: computeFilterLabel(snap) },
+        '*'
+      )
+    } else {
+      sdk.setSuperContent(buildSuperContent(html, snap))
+    }
+    if (persist) sdk.setData({ html: editorEl.innerHTML, filterState: snap })
   }
 
   const DEFAULT_HTML =

@@ -1,11 +1,8 @@
 <script lang="ts">
-  import filters from './filters'
-  import type { FilterState } from './filters'
+  import filters from '../lib/filters'
+  import type { FilterState } from '../lib/filters'
 
-  let {
-    value = $bindable(),
-    onchange
-  }: { value: FilterState; onchange?: () => void } = $props()
+  let { value = $bindable(), onchange }: { value: FilterState; onchange?: () => void } = $props()
 
   let open = $state(false)
 
@@ -46,7 +43,7 @@
     <span class="font-semibold uppercase tracking-[0.04em] text-[#555]">Visibility filters</span>
     <span class="flex items-center gap-1.5">
       {#if hasActiveFilters}
-        <span class="w-1.5 h-1.5 rounded-full bg-[#0078d4]"></span>
+        <span class="w-2 h-2 rounded-full bg-[#d4001c]"></span>
       {/if}
       <svg
         xmlns="http://www.w3.org/2000/svg"

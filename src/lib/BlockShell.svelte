@@ -3,6 +3,7 @@
   import { onMount } from 'svelte'
   import { page } from '$app/state'
   import BlockSDK, { type BlockSDKTab } from '$lib/blocksdk'
+  import FilterPreviewIndicator from '$lib/FilterPreviewIndicator.svelte'
 
   interface Props {
     storageKey: string
@@ -23,6 +24,8 @@
   let notInIframe = $state(false)
   let editorFrame = $state<HTMLIFrameElement | null>(null)
   let emailHTML = $state('')
+  let superHTML = $state('')
+  let filterBadge = $state('')
   let libsReady = $state(false)
 
   type HL = {
@@ -103,6 +106,15 @@
       reply()
       return
     }
+    if (msg.method === 'setSuperContent') {
+      superHTML = msg.payload as string
+      reply()
+      return
+    }
+    if (msg.method === 'setFilterBadge') {
+      filterBadge = msg.payload as string
+      return
+    }
     reply()
   }
 
@@ -173,12 +185,15 @@
           >
             Browser preview
           </div>
-          <iframe
-            srcdoc={emailHTML.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')}
-            title="Email HTML preview"
-            sandbox="allow-same-origin"
-            class="flex-1 w-150 border-0 bg-white"
-          ></iframe>
+          <div class="relative flex-1 min-h-0">
+            <iframe
+              srcdoc={superHTML || emailHTML.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')}
+              title="Email HTML preview"
+              sandbox="allow-same-origin"
+              class="w-150 h-full border-0 bg-white"
+            ></iframe>
+            <FilterPreviewIndicator label={filterBadge} />
+          </div>
         </div>
       </div>
     </div>
