@@ -174,7 +174,7 @@
             Browser preview
           </div>
           <iframe
-            srcdoc={emailHTML}
+            srcdoc={emailHTML.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')}
             title="Email HTML preview"
             sandbox="allow-same-origin"
             class="flex-1 w-150 border-0 bg-white"

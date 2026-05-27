@@ -2,13 +2,16 @@
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
   import BlockShell from '$lib/BlockShell.svelte'
+  import FilterSettings from '$lib/FilterSettings.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
   import { COLORS } from '$lib/const'
   import type BlockSDK from '$lib/blocksdk'
   import type { AnchorEntry } from '$lib/blocksdk'
+  import type { FilterState } from '$lib/filters'
 
   let sdk = $state<BlockSDK | null>(null)
   let editorEl = $state<HTMLDivElement | null>(null)
+  let filterState = $state<FilterState>({})
 
   let showLinkDialog = $state(false)
   let linkUrl = $state('')
@@ -54,16 +57,17 @@
 
   function updateBlock(): void {
     if (!sdk || !editorEl) return
-    sdk.setContent(buildEmailHTML(editorEl.innerHTML))
-    sdk.setData({ html: editorEl.innerHTML })
+    sdk.setContent(buildEmailHTML(editorEl.innerHTML, filterState))
+    sdk.setData({ html: editorEl.innerHTML, filterState })
   }
 
   const DEFAULT_HTML =
     '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
 
   function onReady(data: unknown): void {
-    const d = data as { html?: string } | null
+    const d = data as { html?: string; filterState?: FilterState } | null
     if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
+    filterState = d?.filterState ?? {}
     updateBlock()
   }
 
@@ -430,6 +434,8 @@
       onpaste={handlePaste}
       onclick={handleEditorClick}
     ></div>
+
+    <FilterSettings bind:value={filterState} onchange={updateBlock} />
   </div>
 
   {#if showLinkDialog}

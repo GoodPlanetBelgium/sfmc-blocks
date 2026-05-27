@@ -1,5 +1,7 @@
 import { namedColors } from '$lib/const'
 import defaultTemplate from '$lib/defaultTemplate'
+import { wrapWithFilters } from '$lib/filterAmpscript'
+import type { FilterState } from '$lib/filters'
 
 const H1_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;'
@@ -10,7 +12,7 @@ const BODY_STYLE =
 const LI_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;margin:0;mso-line-height-rule:exactly;'
 
-export function buildEmailHTML(editorHTML: string): string {
+export function buildEmailHTML(editorHTML: string, filterState: FilterState = {}): string {
   if (!editorHTML.trim()) return ''
   const parser = new DOMParser()
   const doc = parser.parseFromString(`<body>${editorHTML}</body>`, 'text/html')
@@ -62,7 +64,7 @@ export function buildEmailHTML(editorHTML: string): string {
 
   flushBody()
   const innerHTML = parts.join('\n')
-  return defaultTemplate({ innerHTML, padding: '0' })
+  return wrapWithFilters(defaultTemplate({ innerHTML, padding: '0' }), filterState)
 }
 
 function serializeInline(el: Element): string {
