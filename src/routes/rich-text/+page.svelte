@@ -55,10 +55,12 @@
     updateBlock()
   }
 
-  function updateBlock(): void {
+  function updateBlock(persist = true): void {
     if (!sdk || !editorEl) return
-    sdk.setContent(buildEmailHTML(editorEl.innerHTML, filterState))
-    sdk.setData({ html: editorEl.innerHTML, filterState })
+    const html = buildEmailHTML(editorEl.innerHTML, filterState)
+    sdk.setContent(html)
+    sdk.setSuperContent(html.replace(/%%[\[=][\s\S]*?[\]=]%%/g, ''))
+    if (persist) sdk.setData({ html: editorEl.innerHTML, filterState: $state.snapshot(filterState) })
   }
 
   const DEFAULT_HTML =
@@ -68,7 +70,7 @@
     const d = data as { html?: string; filterState?: FilterState } | null
     if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
     filterState = d?.filterState ?? {}
-    updateBlock()
+    updateBlock(false)
   }
 
   function handlePaste(e: ClipboardEvent): void {
