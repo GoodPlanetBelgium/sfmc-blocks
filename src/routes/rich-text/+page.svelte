@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
-  import { buildSuperContent, stripAmpscript, computeFilterLabel } from '$lib/filterAmpscript'
+  import { buildSuperContent } from '$lib/filterAmpscript'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
@@ -61,15 +61,7 @@
     const html = buildEmailHTML(editorEl.innerHTML, filterState)
     const snap = $state.snapshot(filterState) as FilterState
     sdk.setContent(html)
-    if (import.meta.env.DEV) {
-      sdk.setSuperContent(stripAmpscript(html))
-      window.parent.postMessage(
-        { method: 'setFilterBadge', payload: computeFilterLabel(snap) },
-        '*'
-      )
-    } else {
-      sdk.setSuperContent(buildSuperContent(html, snap))
-    }
+    sdk.setSuperContent(buildSuperContent(html, snap))
     if (persist) sdk.setData({ html: editorEl.innerHTML, filterState: snap })
   }
 
@@ -353,7 +345,7 @@
   <title>Rich Text Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady} tabs={['stylingblock']}>
+<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady} onEditClose={updateBlock} tabs={['stylingblock']}>
   <div class="flex flex-col gap-2">
     <div class="flex flex-wrap items-center gap-1 p-1.5 border border-[#ddd] rounded bg-[#f8f8f8]">
       <button

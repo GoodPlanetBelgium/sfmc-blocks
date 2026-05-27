@@ -3,12 +3,12 @@
   import { onMount } from 'svelte'
   import { page } from '$app/state'
   import BlockSDK, { type BlockSDKTab } from '$lib/blocksdk'
-  import FilterPreviewIndicator from '$lib/FilterPreviewIndicator.svelte'
 
   interface Props {
     storageKey: string
     sdk?: BlockSDK | null
     onReady: (data: unknown) => void
+    onEditClose?: () => void
     children: Snippet
     tabs?: BlockSDKTab[]
   }
@@ -17,6 +17,7 @@
     storageKey,
     sdk = $bindable<BlockSDK | null>(null),
     onReady,
+    onEditClose,
     children,
     tabs = []
   }: Props = $props()
@@ -25,7 +26,6 @@
   let editorFrame = $state<HTMLIFrameElement | null>(null)
   let emailHTML = $state('')
   let superHTML = $state('')
-  let filterBadge = $state('')
   let libsReady = $state(false)
 
   type HL = {
@@ -111,10 +111,6 @@
       reply()
       return
     }
-    if (msg.method === 'setFilterBadge') {
-      filterBadge = msg.payload as string
-      return
-    }
     reply()
   }
 
@@ -134,7 +130,7 @@
     }
 
     sdk = new BlockSDK(
-      { tabs },
+      { tabs, onEditClose },
       [
         'exacttarget.com',
         'marketingcloudapps.com',
@@ -185,15 +181,12 @@
           >
             Browser preview
           </div>
-          <div class="relative flex-1 min-h-0">
-            <iframe
-              srcdoc={superHTML || emailHTML.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')}
-              title="Email HTML preview"
-              sandbox="allow-same-origin"
-              class="w-150 h-full border-0 bg-white"
-            ></iframe>
-            <FilterPreviewIndicator label={filterBadge} />
-          </div>
+          <iframe
+            srcdoc={superHTML || emailHTML.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')}
+            title="Email HTML preview"
+            sandbox="allow-same-origin"
+            class="flex-1 w-150 border-0 bg-white"
+          ></iframe>
         </div>
       </div>
     </div>
