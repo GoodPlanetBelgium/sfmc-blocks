@@ -1,8 +1,7 @@
 %%[
 /* Get the language value from the sendable DE or subscriber attribute */
-VAR @lang, @unsubscribeText, @privacyPolicyLink, @privacyPolicyText, @legitimateInterest
+VAR @lang, @unsubscribeText, @privacyPolicyLink, @privacyPolicyText
 
-SET @legitimateInterest = AttributeValue("LegitimateInterest")
 SET @lang = AttributeValue("Language")
 IF @lang == "" THEN SET @lang = AttributeValue("Language__c") ENDIF
 IF @lang == "" THEN SET @lang = AttributeValue("C_Language__c") ENDIF
@@ -12,15 +11,12 @@ SET @lang = LOWERCASE(@lang)
 
 /* Set the correct unsubscribe text based on language */
 IF @lang == "nl" THEN
-SET @unsubscribeText = "Uitschrijven"
 SET @privacyPolicyLink = "https://www.goodplanet.be/docs/gpb/05_Privacyverklaring-GoodPlanet-NL_20181017.pdf"
 SET @privacyPolicyText = "Privacybeleid"
 ELSEIF @lang == "fr" THEN
-SET @unsubscribeText = "Se désinscrire"
 SET @privacyPolicyLink = "https://www.goodplanet.be/docs/gpb/09_Privacyverklaring-GoodPlanet-FR_20181017.pdf"
 SET @privacyPolicyText = "Déclaration de confidentialité"
 ELSE
-SET @unsubscribeText = "Update profile / Unsubscribe"
 SET @privacyPolicyLink = "https://www.goodplanet.be/docs/gpb/05_Privacyverklaring-GoodPlanet-NL_20181017.pdf"
 SET @privacyPolicyText = "Privacy Policy"
 ENDIF
@@ -92,14 +88,8 @@ ENDIF
             RPR %%Member_State%% - 0462.923.392
             <br>
             <br>
-            %%[ if 0 == 1 then ]%%%%profile_center_url%%%%[endif]%%
             <a href="%%=RedirectTo(@privacyPolicyLink)=%%" alias="Privacy Policy" target="_blank"
               style="font-size:10px; color: #fff; text-decoration: none; font-weight:bold;">%%=v(@privacyPolicyText)=%%</a>
-            %%[ IF @legitimateInterest != "true" THEN ]%%
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://newsletter.goodplanet.be/update/%%_subscriberkey%%/"
-              alias="Update profile or unsubscribe" target="_blank"
-              style="font-size:10px; color: #fff; text-decoration: none; font-weight:bold;">%%=v(@unsubscribeText)=%%</a>
-            %%[ ENDIF ]%%
           </td>
         </tr>
       </table>
