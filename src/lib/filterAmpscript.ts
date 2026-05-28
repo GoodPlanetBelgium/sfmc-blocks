@@ -1,6 +1,16 @@
 import filters from './filters'
 import type { FilterState } from './filters'
 
+export function normalizeFilterState(raw: FilterState): FilterState {
+  const normalized: FilterState = {}
+  const rawLower = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k.toLowerCase(), v]))
+  for (const filter of filters) {
+    const val = rawLower[filter.field.toLowerCase()]
+    if (val) normalized[filter.field] = val
+  }
+  return normalized
+}
+
 export function parseFilterState(html: string): FilterState {
   const state: FilterState = {}
   let m: RegExpExecArray | null

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
-  import { buildSuperContent, parseFilterState } from '$lib/filterAmpscript'
+  import { buildSuperContent, parseFilterState, normalizeFilterState } from '$lib/filterAmpscript'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
@@ -74,8 +74,9 @@
     if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
 
     if (d?.filterState !== undefined) {
-      console.log('[rich-text] filterState from setData:', JSON.stringify(d.filterState))
-      filterState = d.filterState
+      console.log('[rich-text] filterState from setData (raw):', JSON.stringify(d.filterState))
+      filterState = normalizeFilterState(d.filterState)
+      console.log('[rich-text] filterState normalized:', JSON.stringify(filterState))
       updateBlock(false)
       return
     }
