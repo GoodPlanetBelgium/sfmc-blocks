@@ -1,5 +1,6 @@
 import filters from './filters'
 import type { FilterState } from './filters'
+import type BlockSDK from './blocksdk'
 
 export function normalizeFilterState(raw: FilterState): FilterState {
   const normalized: FilterState = {}
@@ -61,4 +62,21 @@ export function wrapWithFilters(html: string, filterState: FilterState): string 
 
   const condition = conditions.join(' AND ')
   return `%%[IF (${condition}) THEN]%%\n${html}\n%%[ENDIF]%%`
+}
+
+export function applyContent(sdk: BlockSDK, html: string, filterState: FilterState): void {
+  sdk.setContent(html)
+  sdk.setSuperContent(buildSuperContent(html, filterState))
+}
+
+export function restoreFilterState(
+  raw: FilterState | undefined,
+  sdk: BlockSDK | null,
+  setter: (s: FilterState) => void
+): void {
+  if (raw !== undefined) {
+    setter(normalizeFilterState(raw))
+    return
+  }
+  sdk?.getContent((content) => setter(parseFilterState((content as string) ?? '')))
 }

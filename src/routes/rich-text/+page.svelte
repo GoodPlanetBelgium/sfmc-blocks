@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
-  import { buildSuperContent, parseFilterState, normalizeFilterState } from '$lib/filterAmpscript'
+  import { applyContent, restoreFilterState } from '$lib/filterAmpscript'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
@@ -58,10 +58,9 @@
 
   function updateBlock(persist = true): void {
     if (!sdk || !editorEl) return
-    const html = buildEmailHTML(editorEl.innerHTML, filterState)
     const snap = $state.snapshot(filterState) as FilterState
-    sdk.setContent(html)
-    sdk.setSuperContent(buildSuperContent(html, snap))
+    const html = buildEmailHTML(editorEl.innerHTML, snap)
+    applyContent(sdk, html, snap)
     if (persist) sdk.setData({ html: editorEl.innerHTML, filterState: snap })
   }
 
@@ -69,27 +68,9 @@
     '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
 
   function onReady(data: unknown): void {
-    console.log('[rich-text] onReady data:', JSON.stringify(data))
     const d = data as { html?: string; filterState?: FilterState } | null
     if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
-
-    if (d?.filterState !== undefined) {
-      console.log('[rich-text] filterState from setData (raw):', JSON.stringify(d.filterState))
-      filterState = normalizeFilterState(d.filterState)
-      console.log('[rich-text] filterState normalized:', JSON.stringify(filterState))
-      updateBlock(false)
-      return
-    }
-
-    console.log('[rich-text] filterState absent from setData — calling getContent')
-    // filterState absent from setData (race condition on close) — recover from
-    // the setContent HTML which SFMC reliably persists
-    sdk?.getContent((content) => {
-      console.log('[rich-text] getContent result:', typeof content, String(content).slice(0, 300))
-      filterState = parseFilterState((content as string) ?? '')
-      console.log('[rich-text] filterState recovered from content:', JSON.stringify(filterState))
-      updateBlock(false)
-    })
+    restoreFilterState(d?.filterState, sdk, (s) => { filterState = s; updateBlock(false) })
   }
 
   function handlePaste(e: ClipboardEvent): void {

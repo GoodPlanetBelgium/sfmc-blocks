@@ -1,12 +1,16 @@
+import { wrapWithFilters } from '$lib/filterAmpscript'
+import type { FilterState } from '$lib/filters'
+
 export function buildEmailHTML(
   url: string,
   title: string,
   color: string,
   width: number,
-  outlookWidth: number
+  outlookWidth: number,
+  filterState: FilterState = {}
 ): string {
   const hrefUrl = url.replace(/"/g, "'")
-  return `
+  const html = `
 <div style="margin:20px 0px;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
     <tr>
@@ -35,4 +39,5 @@ export function buildEmailHTML(
   </table>
 </div>
 `
+  return wrapWithFilters(html, filterState)
 }

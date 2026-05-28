@@ -1,10 +1,18 @@
 import defaultTemplate from '$lib/defaultTemplate'
+import { wrapWithFilters } from '$lib/filterAmpscript'
+import type { FilterState } from '$lib/filters'
 
-export function buildEmailHTML(anchor: string, title: string, color: string): string {
-  return defaultTemplate({
-    padding: '5px 20px',
-    bgColor: color,
-    innerHTML: `
+export function buildEmailHTML(
+  anchor: string,
+  title: string,
+  color: string,
+  filterState: FilterState = {}
+): string {
+  return wrapWithFilters(
+    defaultTemplate({
+      padding: '5px 20px',
+      bgColor: color,
+      innerHTML: `
       <a id="${anchor}" name="${anchor}"></a>
       <!--[if mso]>
       <table role="presentation" border="0" cellpadding="12" cellspacing="0" width="100%">
@@ -23,5 +31,7 @@ export function buildEmailHTML(anchor: string, title: string, color: string): st
       </h1>
       <!--<![endif]-->
 `
-  })
+    }),
+    filterState
+  )
 }

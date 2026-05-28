@@ -4,7 +4,7 @@
 
   let { value = $bindable(), onchange }: { value: FilterState; onchange?: () => void } = $props()
 
-  let open = $state(true)
+  let open = $state(false)
 
   function toggleValue(field: string, val: string) {
     const current = value[field] ?? { selectedValues: [], includeNull: false }
