@@ -1,5 +1,5 @@
 <script lang="ts">
-  import filters from '../lib/filters'
+  import filters, { getFieldState } from '../lib/filters'
   import type { FilterState } from '../lib/filters'
 
   let { value = $bindable(), onchange }: { value: FilterState; onchange?: () => void } = $props()
@@ -7,7 +7,7 @@
   let open = $state(false)
 
   function toggleValue(field: string, val: string) {
-    const current = value[field] ?? { selectedValues: [], includeNull: false }
+    const current = getFieldState(value, field) ?? { selectedValues: [], includeNull: false }
     const idx = current.selectedValues.indexOf(val)
     const selectedValues =
       idx >= 0 ? current.selectedValues.filter((v) => v !== val) : [...current.selectedValues, val]
@@ -16,22 +16,50 @@
   }
 
   function toggleNull(field: string) {
-    const current = value[field] ?? { selectedValues: [], includeNull: false }
+    const current = getFieldState(value, field) ?? { selectedValues: [], includeNull: false }
     value = { ...value, [field]: { ...current, includeNull: !current.includeNull } }
     onchange?.()
   }
 
+  function toggleOperator(field: string) {
+    const current = (value.operators ?? {})[field] ?? 'AND'
+    value = {
+      ...value,
+      operators: { ...(value.operators ?? {}), [field]: current === 'AND' ? 'OR' : 'AND' }
+    }
+    onchange?.()
+  }
+
+  function toggleGroup(field: string) {
+    const groups = new Set(value.groups ?? [])
+    if (groups.has(field)) {
+      groups.delete(field)
+    } else {
+      // Remove any adjacent (overlapping) groups before adding this one
+      const i = activeFilters.findIndex((f) => f.field === field)
+      if (i >= 2) groups.delete(activeFilters[i - 1].field)
+      if (i < activeFilters.length - 1) groups.delete(activeFilters[i + 1].field)
+      groups.add(field)
+    }
+    value = { ...value, groups: [...groups] }
+    onchange?.()
+  }
+
+  let groupSet = $derived(new Set(value.groups ?? []))
+
   function isSelected(field: string, val: string): boolean {
-    return value[field]?.selectedValues.includes(val) ?? false
+    return getFieldState(value, field)?.selectedValues.includes(val) ?? false
   }
 
   function includesNull(field: string): boolean {
-    return value[field]?.includeNull ?? false
+    return getFieldState(value, field)?.includeNull ?? false
   }
 
-  let hasActiveFilters = $derived(
-    filters.some((f) => (value[f.field]?.selectedValues.length ?? 0) > 0)
+  let activeFilters = $derived(
+    filters.filter((f) => (getFieldState(value, f.field)?.selectedValues.length ?? 0) > 0)
   )
+
+  let hasActiveFilters = $derived(activeFilters.length > 0)
 </script>
 
 <div class="border border-[#ddd] rounded text-xs">
@@ -62,6 +90,44 @@
     </span>
   </button>
 
+  {#if activeFilters.length >= 2}
+    <div class="border-t border-[#ddd] px-3 py-2 flex items-center gap-1 text-[#555] flex-wrap">
+      {#each activeFilters as filter, i}
+        {#if i === 0}
+          {#if activeFilters.length >= 3 && groupSet.has(activeFilters[1].field)}
+            <span class="font-bold font-mono text-[11px]">(</span>
+          {/if}
+          <span>{filter.label}</span>
+        {:else}
+          <button
+            type="button"
+            class="px-1.5 py-0.5 rounded border border-[#bbb] text-[10px] font-bold tracking-wide hover:bg-[#f0f0f0] cursor-pointer"
+            onclick={() => toggleOperator(filter.field)}
+            >{(value.operators ?? {})[filter.field] ?? 'AND'}</button
+          >
+          {#if activeFilters.length >= 3}
+            <button
+              type="button"
+              class="px-1 py-0.5 rounded border text-[10px] cursor-pointer {groupSet.has(
+                filter.field
+              )
+                ? 'border-[#999] bg-[#e8e8e8] text-[#333]'
+                : 'border-[#ddd] text-[#bbb] hover:text-[#888] hover:border-[#bbb]'}"
+              onclick={() => toggleGroup(filter.field)}>(...)</button
+            >
+          {/if}
+          {#if activeFilters.length >= 3 && i + 1 < activeFilters.length && groupSet.has(activeFilters[i + 1].field)}
+            <span class="font-bold font-mono text-[11px]">(</span>
+          {/if}
+          <span>{filter.label}</span>
+          {#if activeFilters.length >= 3 && groupSet.has(filter.field)}
+            <span class="font-bold font-mono text-[11px]">)</span>
+          {/if}
+        {/if}
+      {/each}
+    </div>
+  {/if}
+
   {#if open}
     <div class="border-t border-[#ddd] px-3 pb-3 pt-2 flex flex-col gap-3">
       {#each filters as filter}
@@ -88,7 +154,7 @@
                 onchange={() => toggleNull(filter.field)}
                 class="cursor-pointer"
               />
-              Also show when unavailable
+              Also show when {filter.label.toLowerCase()} is unavailable
             </label>
           </div>
         </div>
