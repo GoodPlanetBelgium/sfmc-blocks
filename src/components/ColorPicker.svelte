@@ -10,7 +10,7 @@
 
 <fieldset class="mb-3.5 border-0 p-0">
   <legend class="block font-semibold mb-1 text-xs text-[#555] uppercase tracking-[0.04em]">
-    Kleur
+    Colour
   </legend>
   <div class="grid grid-cols-4 gap-2">
     {#each COLORS as c (c.id)}

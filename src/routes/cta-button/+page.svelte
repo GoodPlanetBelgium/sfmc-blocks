@@ -45,7 +45,12 @@
   })
 
   function onReady(data: unknown): void {
-    const d = data as { url?: string; title?: string; color?: string; filterState?: FilterState } | null
+    const d = data as {
+      url?: string
+      title?: string
+      color?: string
+      filterState?: FilterState
+    } | null
     if (d?.url) {
       url = d.url
       title = d.title ?? ''
@@ -53,7 +58,9 @@
     } else {
       updateBlock()
     }
-    restoreFilterState(d?.filterState, sdk, (s) => { filterState = s })
+    restoreFilterState(d?.filterState, sdk, (s) => {
+      filterState = s
+    })
   }
 </script>
 
@@ -61,9 +68,15 @@
   <title>CTA Button Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:cta-button" bind:sdk {onReady} onEditClose={updateBlock} tabs={[]}>
+<BlockShell
+  storageKey="sfmc-dev-block-data:cta-button"
+  bind:sdk
+  {onReady}
+  onEditClose={updateBlock}
+  tabs={[]}
+>
   <TextInput label="url" placeholder="https://..." bind:value={url} />
-  <TextInput label="Button tekst" bind:value={title} />
+  <TextInput label="Button text" bind:value={title} />
   <ColorPicker bind:value={color} />
   <FilterSettings bind:value={filterState} />
 </BlockShell>
