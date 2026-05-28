@@ -1,6 +1,25 @@
 import filters from './filters'
 import type { FilterState } from './filters'
 
+export function parseFilterState(html: string): FilterState {
+  const state: FilterState = {}
+  let m: RegExpExecArray | null
+
+  // includeNull: true → (IsNull([FIELD]) OR IndexOf("VALS", [FIELD]) > 0)
+  const nullRe = /\(IsNull\(\[([^\]]+)\]\) OR IndexOf\("([^"]+)", \[[^\]]+\]\) > 0\)/g
+  while ((m = nullRe.exec(html)) !== null) {
+    state[m[1]] = { selectedValues: m[2].split(','), includeNull: true }
+  }
+
+  // includeNull: false → (NOT IsNull([FIELD]) AND IndexOf("VALS", [FIELD]) > 0)
+  const notNullRe = /\(NOT IsNull\(\[([^\]]+)\]\) AND IndexOf\("([^"]+)", \[[^\]]+\]\) > 0\)/g
+  while ((m = notNullRe.exec(html)) !== null) {
+    state[m[1]] = { selectedValues: m[2].split(','), includeNull: false }
+  }
+
+  return state
+}
+
 export function stripAmpscript(html: string): string {
   return html.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { buildEmailHTML } from './template'
-  import { buildSuperContent } from '$lib/filterAmpscript'
+  import { buildSuperContent, parseFilterState } from '$lib/filterAmpscript'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
@@ -69,10 +69,26 @@
     '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
 
   function onReady(data: unknown): void {
+    console.log('[rich-text] onReady data:', JSON.stringify(data))
     const d = data as { html?: string; filterState?: FilterState } | null
     if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
-    filterState = d?.filterState ?? {}
-    updateBlock(false)
+
+    if (d?.filterState !== undefined) {
+      console.log('[rich-text] filterState from setData:', JSON.stringify(d.filterState))
+      filterState = d.filterState
+      updateBlock(false)
+      return
+    }
+
+    console.log('[rich-text] filterState absent from setData — calling getContent')
+    // filterState absent from setData (race condition on close) — recover from
+    // the setContent HTML which SFMC reliably persists
+    sdk?.getContent((content) => {
+      console.log('[rich-text] getContent result:', typeof content, String(content).slice(0, 300))
+      filterState = parseFilterState((content as string) ?? '')
+      console.log('[rich-text] filterState recovered from content:', JSON.stringify(filterState))
+      updateBlock(false)
+    })
   }
 
   function handlePaste(e: ClipboardEvent): void {
