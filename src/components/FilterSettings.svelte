@@ -159,6 +159,18 @@
           </div>
         </div>
       {/each}
+      {#if hasActiveFilters}
+        <div class="border-t border-[#eee] pt-2">
+          <button
+            type="button"
+            class="px-1.5 py-0.5 rounded border border-[#bbb] text-[#d4001c] cursor-pointer"
+            onclick={() => {
+              value = {}
+              onchange?.()
+            }}>Remove all filters</button
+          >
+        </div>
+      {/if}
     </div>
   {/if}
 </div>
