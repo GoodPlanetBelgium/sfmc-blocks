@@ -13,4 +13,6 @@
   <li><a href={resolve('/rich-text')}>rich-text</a></li>
   <li><a href={resolve('/table-of-contents')}>table-of-contents</a></li>
   <li><a href={resolve('/divider')}>divider</a></li>
+  <li><a href={resolve('/filter-start')}>filter-start</a></li>
+  <li><a href={resolve('/filter-end')}>filter-end</a></li>
 </ul>
