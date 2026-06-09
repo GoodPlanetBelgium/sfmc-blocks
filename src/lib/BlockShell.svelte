@@ -145,6 +145,10 @@
     sdk.getData((data: unknown) => {
       onReady(data)
     })
+
+    sdk.getUserData((data: unknown) => {
+      console.log('[sfmc-auth-diag] getUserData payload:', JSON.stringify(data, null, 2))
+    })
   })
 </script>
 
