@@ -27,7 +27,7 @@
   <title>Divider Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:divider" bind:sdk {onReady} onEditClose={updateBlock} tabs={[]}>
+<BlockShell storageKey="sfmc-dev-block-data:divider" bind:sdk {onReady} onEditClose={updateBlock} tabs={[]} blockName="Divider">
   <p class="text-[11px] text-[#888] uppercase tracking-[0.04em]">Horizontal divider</p>
   <FilterSettings bind:value={filterState} onchange={updateBlock} />
 </BlockShell>

@@ -28,6 +28,7 @@ interface SDKConfig {
   onEditClose?: () => void
   tabs?: BlockSDKTab[]
   blockEditorWidth?: number | string
+  name?: string
 }
 
 interface PendingMessage {

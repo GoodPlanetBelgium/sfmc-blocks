@@ -56,7 +56,7 @@
   }
 </script>
 
-<BlockShell storageKey="sfmc-dev-block-data:title" bind:sdk {onReady} onEditClose={updateBlock} tabs={[]}>
+<BlockShell storageKey="sfmc-dev-block-data:title" bind:sdk {onReady} onEditClose={updateBlock} tabs={[]} blockName="Title">
   <TextInput label="Title" bind:value={title} />
   <ColorPicker bind:value={color} />
   <FilterSettings bind:value={filterState} />

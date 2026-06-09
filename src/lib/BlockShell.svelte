@@ -11,6 +11,7 @@
     onEditClose?: () => void
     children: Snippet
     tabs?: BlockSDKTab[]
+    blockName?: string
   }
 
   let {
@@ -19,7 +20,8 @@
     onReady,
     onEditClose,
     children,
-    tabs = []
+    tabs = [],
+    blockName
   }: Props = $props()
 
   let notInIframe = $state(false)
@@ -130,7 +132,7 @@
     }
 
     sdk = new BlockSDK(
-      { tabs, onEditClose },
+      { tabs, onEditClose, ...(blockName ? { name: blockName } : {}) },
       [
         'exacttarget.com',
         'marketingcloudapps.com',

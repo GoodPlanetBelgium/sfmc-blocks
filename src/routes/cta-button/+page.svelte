@@ -74,6 +74,7 @@
   {onReady}
   onEditClose={updateBlock}
   tabs={[]}
+  blockName="CTA Button"
 >
   <TextInput label="url" placeholder="https://..." bind:value={url} />
   <TextInput label="Button text" bind:value={title} />

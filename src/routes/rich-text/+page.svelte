@@ -343,7 +343,7 @@
   <title>Rich Text Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady} onEditClose={updateBlock} tabs={['stylingblock']}>
+<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady} onEditClose={updateBlock} tabs={['stylingblock']} blockName="Text content">
   <div class="flex flex-col gap-2">
     <div class="flex flex-wrap items-center gap-1 p-1.5 border border-[#ddd] rounded bg-[#f8f8f8]">
       <button
