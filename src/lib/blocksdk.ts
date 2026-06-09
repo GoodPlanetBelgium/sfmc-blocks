@@ -126,6 +126,9 @@ class BlockSDK {
   getUserData(cb?: Callback): void {
     this.execute('getUserData', { success: cb })
   }
+  triggerAuth(appId: string, cb?: Callback): void {
+    this.execute('triggerAuth', { data: appId, success: cb })
+  }
   getView(cb?: Callback): void {
     this.execute('getView', { success: cb })
   }
