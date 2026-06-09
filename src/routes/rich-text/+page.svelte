@@ -70,7 +70,10 @@
   function onReady(data: unknown): void {
     const d = data as { html?: string; filterState?: FilterState } | null
     if (editorEl) editorEl.innerHTML = d?.html ?? DEFAULT_HTML
-    restoreFilterState(d?.filterState, sdk, (s) => { filterState = s; updateBlock(false) })
+    restoreFilterState(d?.filterState, sdk, (s) => {
+      filterState = s
+      updateBlock(false)
+    })
   }
 
   function handlePaste(e: ClipboardEvent): void {
@@ -343,7 +346,14 @@
   <title>Rich Text Block</title>
 </svelte:head>
 
-<BlockShell storageKey="sfmc-dev-block-data:rich-text" bind:sdk {onReady} onEditClose={updateBlock} tabs={['stylingblock']} blockName="Text content">
+<BlockShell
+  storageKey="sfmc-dev-block-data:rich-text"
+  bind:sdk
+  {onReady}
+  onEditClose={updateBlock}
+  tabs={['stylingblock']}
+  blockName="Text content"
+>
   <div class="flex flex-col gap-2">
     <div class="flex flex-wrap items-center gap-1 p-1.5 border border-[#ddd] rounded bg-[#f8f8f8]">
       <button
@@ -402,7 +412,7 @@
         ></button>
       {/each}
       <button
-        title="Kleur verwijderen"
+        title="Remove color"
         onmousedown={(e) => e.preventDefault()}
         onclick={removeColor}
         class="w-5 h-5 rounded-full border-2 border-white shadow-sm cursor-pointer hover:scale-110 transition-transform flex items-center justify-center"
@@ -448,33 +458,43 @@
     >
       <div class="bg-white rounded-lg p-4 shadow-xl w-80">
         <p class="text-xs font-semibold uppercase text-[#555] tracking-[0.04em] mb-1">
-          URL of e-mailadres
+          URL or email address
         </p>
         <input
           bind:this={linkDialogInput}
           type="text"
           bind:value={linkUrl}
-          placeholder="https://... of naam@voorbeeld.be"
+          placeholder="https://... or name@example.com"
           class="w-full border border-[#ddd] rounded px-2 py-1.5 text-sm mb-2 focus:outline-none focus:border-[#0078d4]"
           onkeydown={handleLinkKeyDown}
         />
         <div class="mb-3">
-          <AnchorPicker anchors={availableAnchors} bind:value={linkUrl} />
+          <AnchorPicker anchors={availableAnchors} bind:value={linkUrl} onRefresh={() => {
+            availableAnchors = []
+            sdk?.getCentralData((cd) => {
+              const seen = new Set<string>()
+              availableAnchors = (cd.anchors ?? []).filter((a) => {
+                if (seen.has(a.anchor)) return false
+                seen.add(a.anchor)
+                return true
+              })
+            })
+          }} />
         </div>
         <div class="flex items-center gap-2">
           {#if linkUrl}
             <button
               class="text-xs text-red-500 hover:text-red-700 mr-auto cursor-pointer"
-              onclick={removeLink}>Verwijder link</button
+              onclick={removeLink}>Remove link</button
             >
           {/if}
           <button
             class="px-3 py-1 text-xs rounded border border-[#ddd] hover:bg-[#f5f5f5] cursor-pointer ml-auto"
-            onclick={closeLinkDialog}>Annuleer</button
+            onclick={closeLinkDialog}>Cancel</button
           >
           <button
             class="px-3 py-1 text-xs rounded bg-[#0078d4] text-white hover:bg-[#006bc1] cursor-pointer"
-            onclick={applyLink}>Toevoegen</button
+            onclick={applyLink}>Add</button
           >
         </div>
       </div>

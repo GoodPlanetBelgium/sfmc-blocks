@@ -11,6 +11,7 @@
 type Callback<T = unknown> = (payload: T) => void
 
 export interface AnchorEntry {
+  id?: string
   anchor: string
   title: string
 }

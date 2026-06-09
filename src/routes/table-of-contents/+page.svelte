@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { buildEmailHTML } from './template'
+  import { buildEmailHTML, buildSuperHTML } from './template'
   import BlockShell from '$lib/BlockShell.svelte'
   import TextInput from '../../components/TextInput.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
+  import FilterSettings from '../../components/FilterSettings.svelte'
   import type BlockSDK from '$lib/blocksdk'
   import type { AnchorEntry } from '$lib/blocksdk'
   import type { ContentTableItem } from './template'
@@ -12,16 +13,16 @@
   let availableAnchors = $state<AnchorEntry[]>([])
 
   let emailHTML = $derived(buildEmailHTML(items))
+  let superHTML = $derived(buildSuperHTML(items))
 
   $effect(() => {
     if (!sdk) return
     sdk.setContent(emailHTML)
+    sdk.setSuperContent(superHTML)
     sdk.setData({ items: $state.snapshot(items) })
   })
 
-  function onReady(data: unknown): void {
-    const d = data as { items?: ContentTableItem[] } | null
-    if (d?.items?.length) items = d.items
+  function loadAnchors(): void {
     sdk?.getCentralData((cd) => {
       const seen = new Set<string>()
       availableAnchors = (cd.anchors ?? []).filter((a) => {
@@ -32,8 +33,14 @@
     })
   }
 
+  function onReady(data: unknown): void {
+    const d = data as { items?: ContentTableItem[] } | null
+    if (d?.items?.length) items = d.items.map((item) => ({ filters: {}, ...item }))
+    loadAnchors()
+  }
+
   function addItem(): void {
-    items = [...items, { title: '', anchor: '' }]
+    items = [...items, { title: '', anchor: '', filters: {} }]
   }
 
   function removeItem(index: number): void {
@@ -52,21 +59,22 @@
         <div class="flex items-center justify-end">
           <button
             class="text-xs text-red-400 hover:text-red-600 cursor-pointer"
-            onclick={() => removeItem(i)}>Verwijder</button
+            onclick={() => removeItem(i)}>Remove</button
           >
         </div>
-        <TextInput label="Titel" bind:value={item.title} />
+        <TextInput label="Title" bind:value={item.title} />
         <div>
-          <TextInput label="Anker" placeholder="#sectie" bind:value={item.anchor} />
+          <TextInput label="Anchor" placeholder="#section" bind:value={item.anchor} />
           <div class="mt-1.5">
-            <AnchorPicker anchors={availableAnchors} bind:value={item.anchor} />
+            <AnchorPicker anchors={availableAnchors} bind:value={item.anchor} onRefresh={loadAnchors} />
           </div>
         </div>
+        <FilterSettings bind:value={item.filters!} />
       </div>
     {/each}
     <button
       class="w-full py-2 text-xs border border-dashed border-[#bbb] rounded text-[#666] hover:bg-[#f0f0f0] cursor-pointer transition-colors"
-      onclick={addItem}>+ Item toevoegen</button
+      onclick={addItem}>+ Add item</button
     >
   </div>
 </BlockShell>
