@@ -9,10 +9,11 @@
 
   interface Props {
     value?: string
+    asset?: SFMCAsset
     onselect: (url: string, asset: SFMCAsset) => void
   }
 
-  let { value, onselect }: Props = $props()
+  let { value, asset, onselect }: Props = $props()
 
   let open = $state(false)
   let search = $state('')
@@ -47,12 +48,22 @@
     return null
   }
 
+  function findPath(nodes: FolderNode[], id: number, path: number[] = []): number[] | null {
+    for (const n of nodes) {
+      if (n.id === id) return [...path, n.id]
+      const found = findPath(n.children, id, [...path, n.id])
+      if (found) return found
+    }
+    return null
+  }
+
   function buildTree(folders: SFMCFolder[]): FolderNode[] {
+    const sorted = [...folders].sort((a, b) => a.name.localeCompare(b.name))
     const map = new Map<number, FolderNode>(
-      folders.map((f) => [f.id, { id: f.id, name: f.name, children: [] }])
+      sorted.map((f) => [f.id, { id: f.id, name: f.name, children: [] }])
     )
     const roots: FolderNode[] = []
-    for (const f of folders) {
+    for (const f of sorted) {
       const node = map.get(f.id)!
       if (f.parentId == null || f.parentId === 0 || !map.has(f.parentId)) {
         roots.push(node)
@@ -60,7 +71,7 @@
         map.get(f.parentId)!.children.push(node)
       }
     }
-    return roots
+    return roots.length === 1 ? roots[0].children : roots
   }
 
   async function load() {
@@ -97,19 +108,31 @@
     }
   }
 
-  async function loadFolders() {
+  async function loadFolders(): Promise<FolderNode[]> {
     foldersLoading = true
     try {
       const flat = await fetchFolders()
       const tree = buildTree(flat)
       folderTree = tree
-      // Auto-expand root folders
       expandedIds = tree.map((n) => n.id)
+      return tree
     } catch {
-      // Folder nav is optional — silently ignore errors
+      return []
     } finally {
       foldersLoading = false
     }
+  }
+
+  function applyPreselect(categoryId: number, tree: FolderNode[]) {
+    selectedCategoryId = categoryId
+    const node = findNode(tree, categoryId)
+    selectedCategoryIds = node ? collectDescendantIds(node) : [categoryId]
+    const path = findPath(tree, categoryId)
+    if (path && path.length > 1) {
+      expandedIds = [...new Set([...expandedIds, ...path.slice(0, -1)])]
+    }
+    page = 1
+    load()
   }
 
   function openPicker() {
@@ -117,10 +140,17 @@
     page = 1
     search = ''
     searchInput = ''
-    selectedCategoryId = null
-    selectedCategoryIds = null
+    const preselect = asset?.category?.id ?? null
+    selectedCategoryId = preselect
+    selectedCategoryIds = preselect !== null ? [preselect] : null
     load()
-    if (folderTree.length === 0) loadFolders()
+    if (folderTree.length === 0) {
+      loadFolders().then((tree) => {
+        if (preselect !== null) applyPreselect(preselect, tree)
+      })
+    } else if (preselect !== null) {
+      applyPreselect(preselect, folderTree)
+    }
   }
 
   function close() {

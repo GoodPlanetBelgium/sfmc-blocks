@@ -12,7 +12,7 @@ export interface SFMCAsset {
     fileSize?: number
     extension?: string
   }
-  category: { name: string }
+  category: { id: number; name: string }
   createdDate: string
 }
 
