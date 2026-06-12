@@ -146,17 +146,6 @@
       onReady(data)
     })
 
-    sdk.getUserData((data: unknown) => {
-      console.log('[sfmc-auth-diag] getUserData payload:', JSON.stringify(data, null, 2))
-      const appId = (data as { originUrl?: string })?.originUrl?.match(/appId=([^&]+)/)?.[1]
-      if (appId) {
-        sdk!.triggerAuth(appId, (tokenData: unknown) => {
-          console.log('[sfmc-auth-diag] triggerAuth response:', JSON.stringify(tokenData, null, 2))
-        })
-      } else {
-        console.log('[sfmc-auth-diag] triggerAuth skipped: no appId in originUrl')
-      }
-    })
   })
 </script>
 

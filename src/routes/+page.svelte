@@ -13,4 +13,5 @@
   <li><a href={resolve('/rich-text')}>rich-text</a></li>
   <li><a href={resolve('/table-of-contents')}>table-of-contents</a></li>
   <li><a href={resolve('/divider')}>divider</a></li>
+  <li><a href={resolve('/image')}>image</a></li>
 </ul>

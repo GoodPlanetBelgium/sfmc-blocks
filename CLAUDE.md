@@ -38,12 +38,50 @@ No test suite exists. Type-check with `bun run check` before committing.
 
 **GitHub Actions** (`deploy.yml`) — push to `main` builds and deploys to GitHub Pages automatically. No manual deploy step needed.
 
+## Shared components
+
+**`src/components/FilterSettings.svelte`** — collapsible visibility filter UI. Bind `value` (a `FilterState`) and pass `onchange` to be notified on change. Filters are defined in `$lib/filters.ts`. The `$lib/filterAmpscript.ts` module converts `FilterState` into AMPscript `%%[IF ...]%%` wrappers around the email HTML via `wrapWithFilters()`, and `applyContent()` calls both `sdk.setContent()` and `sdk.setSuperContent()` together.
+
+**`src/components/AssetPicker.svelte`** — SFMC image picker. Shows a button (thumbnail if an image is selected, placeholder if not). On click, opens a modal with debounced search, 4-column image grid, and pagination. Props: `value` (current image URL) and `onselect(url, asset)` callback.
+
+**`src/components/AnchorPicker.svelte`** — picks from `CentralData` anchors registered by the title block; used inside the rich-text link dialog.
+
+## SFMC asset picker infrastructure
+
+Image assets are fetched from SFMC's Content Builder REST API via a server-side proxy in the `goodplanet-apps` monorepo (`apps/sfmc-assets`), deployed at `https://sfmc-auth.goodplanet.be`.
+
+- `GET /api/assets?page=&pageSize=&search=` — returns paginated SFMC image assets
+- `POST /api/token` — returns a short-lived SFMC access token (used by `AssetPicker` indirectly; assets proxy handles auth internally)
+
+Client module: **`src/lib/sfmc-assets.ts`** — calls `/api/assets`, returns `AssetPage`. The endpoint is configured via `PUBLIC_ASSETS_ENDPOINT` env var (see below).
+
+**Important implementation details:**
+- The proxy uses `node:https` directly (not `fetch`) to send requests to SFMC. Node.js `fetch`/undici normalises percent-encoded characters in URLs (e.g. `%3D→=`, `%28→(`) which breaks SFMC's Simple Query parser.
+- SFMC's filter syntax uses OData-style operators: `assetType.id eq 22`, `or`, `and`, `like`. Standard `=` and `OR` return 400 "Invalid Query Format".
+- The proxy requires `SFMC_ACCOUNT_ID` (the business unit MID) in the token request body; without it SFMC returns 403 "Insufficient Privileges" on the assets endpoint.
+
+## Environment variables
+
+`.env` (gitignored, not committed) is required for local dev:
+
+```
+PUBLIC_ASSETS_ENDPOINT=http://localhost:3004/api/assets
+```
+
+The local proxy runs via `pnpm dev` in the `goodplanet-apps` monorepo (`apps/sfmc-assets`, port 3004).
+
+For production builds, `PUBLIC_ASSETS_ENDPOINT` is injected by GitHub Actions from a repository variable (`vars.PUBLIC_ASSETS_ENDPOINT = https://sfmc-auth.goodplanet.be/api/assets`).
+
 ## Adding a new block
 
 1. Create `src/routes/<block-name>/+page.svelte` — follow the pattern in `cta-button/+page.svelte`: declare `$state` for each field, write an `onReady` to restore saved data, use a `$effect` that calls `updateBlock()` on any state change, and wrap everything in `<BlockShell>`.
 2. Create `src/routes/<block-name>/template.ts` exporting `buildEmailHTML(...)`.
 3. Add a link to `src/routes/+page.svelte` (dev index page).
 4. Push to `main` — no SFMC registration needed until ready to test in Content Builder.
+
+For blocks that include an image, use `<AssetPicker>` and call `applyContent()` + `sdk.setData()` in `updateBlock`. See `src/routes/image/+page.svelte` as the reference.
+
+For blocks with visibility filtering, use `<FilterSettings bind:value={filterState} onchange={updateBlock} />` and wrap the email HTML with `wrapWithFilters(html, filterState)` in `template.ts`. Use `applyContent()` instead of calling `sdk.setContent()` directly. See `src/routes/rich-text/` as the reference.
 
 ## Code style
 
