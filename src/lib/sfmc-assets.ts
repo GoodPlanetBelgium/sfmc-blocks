@@ -1,6 +1,6 @@
 import { PUBLIC_ASSETS_ENDPOINT } from '$env/static/public'
 
-const ASSETS_ENDPOINT = PUBLIC_ASSETS_ENDPOINT
+const PROXY_BASE = PUBLIC_ASSETS_ENDPOINT.replace(/\/[^/]+$/, '')
 
 export interface SFMCAsset {
   id: number
@@ -23,22 +23,30 @@ export interface AssetPage {
   pageSize: number
 }
 
+export interface SFMCFolder {
+  id: number
+  name: string
+  parentId: number | null
+}
+
 export async function fetchImages(
   opts: {
     page?: number
     pageSize?: number
     search?: string
+    categoryIds?: number[]
   } = {}
 ): Promise<AssetPage> {
-  const { page = 1, pageSize = 24, search } = opts
+  const { page = 1, pageSize = 24, search, categoryIds } = opts
 
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize)
   })
   if (search) params.set('search', search)
+  if (categoryIds?.length) params.set('categoryIds', categoryIds.join(','))
 
-  const res = await fetch(`${ASSETS_ENDPOINT}?${params}`)
+  const res = await fetch(`${PROXY_BASE}/assets?${params}`)
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }))
@@ -63,4 +71,17 @@ export async function fetchImages(
     page: data.page ?? page,
     pageSize: data.pageSize ?? pageSize
   }
+}
+
+export async function fetchFolders(): Promise<SFMCFolder[]> {
+  const res = await fetch(`${PROXY_BASE}/folders`)
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: res.statusText }))
+    const b = body as { error?: string }
+    throw new Error(b.error ?? 'Failed to load folders')
+  }
+
+  const data = (await res.json()) as { items: SFMCFolder[] }
+  return data.items ?? []
 }

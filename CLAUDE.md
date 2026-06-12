@@ -59,6 +59,7 @@ Client module: **`src/lib/sfmc-assets.ts`** — calls `/api/assets`, returns `As
 - The proxy uses `node:https` directly (not `fetch`) to send requests to SFMC. Node.js `fetch`/undici normalises percent-encoded characters in URLs (e.g. `%3D→=`, `%28→(`) which breaks SFMC's Simple Query parser.
 - SFMC's filter syntax uses OData-style operators: `assetType.id eq 22`, `or`, `and`, `like`. Standard `=` and `OR` return 400 "Invalid Query Format".
 - The proxy requires `SFMC_ACCOUNT_ID` (the business unit MID) in the token request body; without it SFMC returns 403 "Insufficient Privileges" on the assets endpoint.
+- `category.id eq X` filtering is **not supported** by SFMC's Simple Query: a category-only filter returns 403, and combining it with `and assetType.id eq Y` silently returns 0 results. Folder browsing in the asset picker works by fetching all type-matching assets and filtering by category server-side in the proxy (`apps/sfmc-assets/pages/api/assets.ts → fetchAllByType`).
 
 ## Environment variables
 
