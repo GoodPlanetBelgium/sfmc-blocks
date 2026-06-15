@@ -67,7 +67,8 @@
   }
 
   function toggleItem(index: number): void {
-    expandedItems = expandedItems.map((v, i) => (i === index ? !v : v))
+    const opening = !expandedItems[index]
+    expandedItems = expandedItems.map((v, i) => (i === index ? opening : opening ? false : v))
   }
 </script>
 
