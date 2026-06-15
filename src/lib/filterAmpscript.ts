@@ -35,20 +35,21 @@ export function parseFilterState(html: string): FilterState {
   const state: FilterState = {}
   let m: RegExpExecArray | null
 
-  const nullRe = /\(IsNull\(\[([^\]]+)\]\) OR IndexOf\("([^"]+)", \[[^\]]+\]\) > 0\)/g
+  const nullRe = /\((?:IsNull|Empty)\(\[([^\]]+)\]\) OR IndexOf\("([^"]+)", \[[^\]]+\]\) > 0\)/g
   while ((m = nullRe.exec(html)) !== null) {
     state[m[1]] = { selectedValues: m[2].split(','), includeNull: true }
   }
 
-  const notNullRe = /\(NOT IsNull\(\[([^\]]+)\]\) AND IndexOf\("([^"]+)", \[[^\]]+\]\) > 0\)/g
+  const notNullRe =
+    /\(NOT (?:IsNull|Empty)\(\[([^\]]+)\]\) AND IndexOf\("([^"]+)", \[[^\]]+\]\) > 0\)/g
   while ((m = notNullRe.exec(html)) !== null) {
     state[m[1]] = { selectedValues: m[2].split(','), includeNull: false }
   }
 
   const ifMatch = /%%\[IF \(([\s\S]+?)\) THEN\]%%/.exec(html)
   if (ifMatch) {
-    // Match "> 0) AND/OR (NOT? IsNull([field])" to find operator before each non-first condition
-    const gapRe = /> 0\)\s+(AND|OR)\s+\((?:NOT\s+)?IsNull\(\[([^\]]+)\]\)/g
+    // Match "> 0) AND/OR (NOT? Empty([field])" to find operator before each non-first condition
+    const gapRe = /> 0\)\s+(AND|OR)\s+\((?:NOT\s+)?(?:IsNull|Empty)\(\[([^\]]+)\]\)/g
     const operators: Record<string, 'AND' | 'OR'> = {}
     while ((m = gapRe.exec(ifMatch[1])) !== null) operators[m[2]] = m[1] as 'AND' | 'OR'
     if (Object.keys(operators).length > 0) state.operators = operators
@@ -78,8 +79,8 @@ export function wrapWithFilters(html: string, filterState: FilterState): string 
     if (!state || state.selectedValues.length === 0) continue
     const vals = state.selectedValues.join(',')
     const condition = state.includeNull
-      ? `(IsNull([${filter.field}]) OR IndexOf("${vals}", [${filter.field}]) > 0)`
-      : `(NOT IsNull([${filter.field}]) AND IndexOf("${vals}", [${filter.field}]) > 0)`
+      ? `(Empty([${filter.field}]) OR IndexOf("${vals}", [${filter.field}]) > 0)`
+      : `(NOT Empty([${filter.field}]) AND IndexOf("${vals}", [${filter.field}]) > 0)`
     parts.push({ field: filter.field, condition })
   }
 
