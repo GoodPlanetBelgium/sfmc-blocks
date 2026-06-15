@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import AnchorPicker from './AnchorPicker.svelte'
+  import Label from './Label.svelte'
   import { COLORS } from '$lib/const'
   import type BlockSDK from '$lib/blocksdk'
   import type { AnchorEntry } from '$lib/blocksdk'
@@ -361,10 +362,8 @@
     <button class={btnClass(isBold)} onmousedown={(e) => e.preventDefault()} onclick={applyBold}
       ><strong>B</strong></button
     >
-    <button
-      class={btnClass(isItalic)}
-      onmousedown={(e) => e.preventDefault()}
-      onclick={applyItalic}><em>I</em></button
+    <button class={btnClass(isItalic)} onmousedown={(e) => e.preventDefault()} onclick={applyItalic}
+      ><em>I</em></button
     >
     <button class={btnClass(false)} aria-label="Link invoegen" onclick={openLinkDialog}>
       <svg
@@ -436,17 +435,17 @@
     aria-modal="true"
   >
     <div class="bg-white rounded-lg p-4 shadow-xl w-80">
-      <p class="text-xs font-semibold uppercase text-[#555] tracking-[0.04em] mb-1">
-        URL or email address
-      </p>
-      <input
-        bind:this={linkDialogInput}
-        type="text"
-        bind:value={linkUrl}
-        placeholder="https://... or name@example.com"
-        class="w-full border border-[#ddd] rounded px-2 py-1.5 text-sm mb-2 focus:outline-none focus:border-[#0078d4]"
-        onkeydown={handleLinkKeyDown}
-      />
+      <div class="flex flex-col gap-1 mb-2">
+        <Label text="URL or email address" />
+        <input
+          bind:this={linkDialogInput}
+          type="text"
+          bind:value={linkUrl}
+          placeholder="https://... or name@example.com"
+          class="w-full border border-[#ddd] rounded px-2 py-1.5 text-sm focus:outline-none focus:border-[#0078d4]"
+          onkeydown={handleLinkKeyDown}
+        />
+      </div>
       <div class="mb-3">
         <AnchorPicker
           anchors={availableAnchors}

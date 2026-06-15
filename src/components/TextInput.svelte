@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Label from './Label.svelte'
+
   interface Props {
     label: string
     placeholder?: string
@@ -8,13 +10,8 @@
   let { label, placeholder, value = $bindable() }: Props = $props()
 </script>
 
-<div>
-  <label
-    for="btn-url"
-    class="block font-semibold mb-1 text-xs text-[#555] uppercase tracking-[0.04em]"
-  >
-    {label}
-  </label>
+<div class="flex flex-col gap-1">
+  <Label text={label} />
   <input
     type="text"
     bind:value

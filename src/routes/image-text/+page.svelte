@@ -5,10 +5,10 @@
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AssetPicker from '../../components/AssetPicker.svelte'
   import RichTextInput from '../../components/RichTextInput.svelte'
+  import Label from '../../components/Label.svelte'
   import type BlockSDK from '$lib/blocksdk'
   import type { SFMCAsset } from '$lib/sfmc-assets'
   import type { FilterState } from '$lib/filters'
-
 
   let sdk = $state<BlockSDK | null>(null)
   let imageUrl = $state('')
@@ -25,7 +25,8 @@
     const snap = $state.snapshot(filterState) as FilterState
     const html = buildEmailHTML(imageUrl, assetId, editorHtml, splitPct, swapped, snap)
     applyContent(sdk, html, snap)
-    if (persist) sdk.setData({ imageUrl, assetId, editorHtml, splitPct, swapped, filterState: snap })
+    if (persist)
+      sdk.setData({ imageUrl, assetId, editorHtml, splitPct, swapped, filterState: snap })
   }
 
   function onReady(data: unknown): void {
@@ -79,7 +80,7 @@
 >
   <div class="flex flex-col gap-3">
     <div class="flex flex-col gap-2">
-      <p class="text-xs font-semibold uppercase tracking-[0.04em] text-[#555]">Column split</p>
+      <Label text="Column split" />
       <input
         type="range"
         min="20"
@@ -136,12 +137,12 @@
     </div>
 
     <div class="flex flex-col gap-1">
-      <p class="text-xs font-semibold uppercase tracking-[0.04em] text-[#555]">Image</p>
+      <Label text="Image" />
       <AssetPicker value={imageUrl} onselect={onSelect} />
     </div>
 
     <div class="flex flex-col gap-1">
-      <p class="text-xs font-semibold uppercase tracking-[0.04em] text-[#555]">Text content</p>
+      <Label text="Text content" />
       <RichTextInput bind:value={editorHtml} {sdk} onchange={updateBlock} />
     </div>
 
