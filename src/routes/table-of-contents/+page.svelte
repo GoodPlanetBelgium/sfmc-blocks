@@ -4,22 +4,24 @@
   import TextInput from '../../components/TextInput.svelte'
   import AnchorPicker from '../../components/AnchorPicker.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
+  import RichTextInput from '../../components/RichTextInput.svelte'
   import type BlockSDK from '$lib/blocksdk'
   import type { AnchorEntry } from '$lib/blocksdk'
   import type { ContentTableItem } from './template'
 
   let sdk = $state<BlockSDK | null>(null)
   let items = $state<ContentTableItem[]>([])
+  let richTextHtml = $state('')
   let availableAnchors = $state<AnchorEntry[]>([])
 
-  let emailHTML = $derived(buildEmailHTML(items))
-  let superHTML = $derived(buildSuperHTML(items))
+  let emailHTML = $derived(buildEmailHTML(items, richTextHtml))
+  let superHTML = $derived(buildSuperHTML(items, richTextHtml))
 
   $effect(() => {
     if (!sdk) return
     sdk.setContent(emailHTML)
     sdk.setSuperContent(superHTML)
-    sdk.setData({ items: $state.snapshot(items) })
+    sdk.setData({ items: $state.snapshot(items), richTextHtml })
   })
 
   function loadAnchors(): void {
@@ -34,8 +36,9 @@
   }
 
   function onReady(data: unknown): void {
-    const d = data as { items?: ContentTableItem[] } | null
+    const d = data as { items?: ContentTableItem[]; richTextHtml?: string } | null
     if (d?.items?.length) items = d.items.map((item) => ({ filters: {}, ...item }))
+    if (d?.richTextHtml) richTextHtml = d.richTextHtml
     loadAnchors()
   }
 
@@ -54,6 +57,7 @@
 
 <BlockShell storageKey="sfmc-dev-block-data:table-of-contents" bind:sdk {onReady} tabs={[]} blockName="Table of contents">
   <div class="flex flex-col gap-3">
+    <RichTextInput bind:value={richTextHtml} {sdk} />
     {#each items as item, i (i)}
       <div class="flex flex-col gap-2 p-3 border border-[#e0e0e0] rounded bg-[#fafafa]">
         <div class="flex items-center justify-end">

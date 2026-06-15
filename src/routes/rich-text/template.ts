@@ -12,7 +12,7 @@ const BODY_STYLE =
 const LI_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;margin:0;mso-line-height-rule:exactly;'
 
-export function buildEmailHTML(editorHTML: string, filterState: FilterState = {}): string {
+export function buildEmailInnerHTML(editorHTML: string): string {
   if (!editorHTML.trim()) return ''
   const parser = new DOMParser()
   const doc = parser.parseFromString(`<body>${editorHTML}</body>`, 'text/html')
@@ -63,7 +63,12 @@ export function buildEmailHTML(editorHTML: string, filterState: FilterState = {}
   }
 
   flushBody()
-  const innerHTML = parts.join('\n')
+  return parts.join('\n')
+}
+
+export function buildEmailHTML(editorHTML: string, filterState: FilterState = {}): string {
+  const innerHTML = buildEmailInnerHTML(editorHTML)
+  if (!innerHTML) return ''
   return wrapWithFilters(defaultTemplate({ innerHTML, padding: '0' }), filterState)
 }
 
