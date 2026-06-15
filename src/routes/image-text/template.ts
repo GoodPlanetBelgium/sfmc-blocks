@@ -2,24 +2,6 @@ import { namedColors } from '$lib/const'
 import { wrapWithFilters } from '$lib/filterAmpscript'
 import type { FilterState } from '$lib/filters'
 
-export type Layout =
-  | 'image-left-50-50'
-  | 'text-left-50-50'
-  | 'image-left-40-60'
-  | 'text-left-60-40'
-  | 'image-left-20-80'
-  | 'text-left-80-20'
-
-const LAYOUT_CONFIGS: Record<Layout, { imageFirst: boolean; leftPct: number; rightPct: number; imgWidth: number }> = {
-  'image-left-50-50': { imageFirst: true,  leftPct: 50, rightPct: 50, imgWidth: 285 },
-  'text-left-50-50':  { imageFirst: false, leftPct: 50, rightPct: 50, imgWidth: 285 },
-  'image-left-40-60': { imageFirst: true,  leftPct: 40, rightPct: 60, imgWidth: 234 },
-  'text-left-60-40':  { imageFirst: false, leftPct: 60, rightPct: 40, imgWidth: 234 },
-  'image-left-20-80': { imageFirst: true,  leftPct: 20, rightPct: 80, imgWidth: 114 },
-  'text-left-80-20':  { imageFirst: false, leftPct: 80, rightPct: 20, imgWidth: 114 },
-}
-
-export const VALID_LAYOUTS = Object.keys(LAYOUT_CONFIGS) as Layout[]
 
 const H1_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;'
@@ -34,22 +16,24 @@ export function buildEmailHTML(
   imageUrl: string,
   assetId: number | null,
   editorHTML: string,
-  layout: Layout,
+  splitPct: number,
+  swapped: boolean,
   filterState: FilterState = {}
 ): string {
-  const { imageFirst, leftPct, rightPct, imgWidth } = LAYOUT_CONFIGS[layout]
+  const rightPct = 100 - splitPct
+  const imgColPct = swapped ? rightPct : splitPct
+  const imgWidth = Math.round((imgColPct / 100) * 570)
   const assetAttr = assetId != null ? ` data-assetid="${assetId}"` : ''
   const imgCell = imageUrl
     ? `<img${assetAttr} src="${imageUrl}" alt="" width="${imgWidth}" style="display:block;width:100%;height:auto;border:0;">`
     : `<div style="background:#f0f0f0;width:100%;aspect-ratio:1/1;min-height:120px;"></div>`
 
   const textCell = serializeRichText(editorHTML)
-
-  const [leftCell, rightCell] = imageFirst ? [imgCell, textCell] : [textCell, imgCell]
+  const [leftCell, rightCell] = swapped ? [textCell, imgCell] : [imgCell, textCell]
 
   const innerHTML = `<table cellpadding="0" cellspacing="0" width="100%" role="presentation">
   <tr>
-    <td width="${leftPct}%" valign="top" style="padding-right:12px;">${leftCell}</td>
+    <td width="${splitPct}%" valign="top" style="padding-right:12px;">${leftCell}</td>
     <td width="${rightPct}%" valign="top" style="padding-left:12px;">${rightCell}</td>
   </tr>
 </table>`

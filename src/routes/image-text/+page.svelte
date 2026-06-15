@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildEmailHTML, VALID_LAYOUTS, type Layout } from './template'
+  import { buildEmailHTML } from './template'
   import { applyContent, restoreFilterState } from '$lib/filterAmpscript'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
@@ -9,28 +9,23 @@
   import type { SFMCAsset } from '$lib/sfmc-assets'
   import type { FilterState } from '$lib/filters'
 
+
   let sdk = $state<BlockSDK | null>(null)
   let imageUrl = $state('')
   let assetId = $state<number | null>(null)
   let editorHtml = $state(
     '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
   )
-  let layout = $state<Layout>('image-left-50-50')
+  let splitPct = $state(50)
+  let swapped = $state(false)
   let filterState = $state<FilterState>({})
 
   function updateBlock(persist = true): void {
     if (!sdk) return
     const snap = $state.snapshot(filterState) as FilterState
-    const html = buildEmailHTML(imageUrl, assetId, editorHtml, layout, snap)
+    const html = buildEmailHTML(imageUrl, assetId, editorHtml, splitPct, swapped, snap)
     applyContent(sdk, html, snap)
-    if (persist) sdk.setData({ imageUrl, assetId, editorHtml, layout, filterState: snap })
-  }
-
-  function migrateLayout(raw: unknown): Layout {
-    if (raw === 'image-left') return 'image-left-50-50'
-    if (raw === 'text-left') return 'text-left-50-50'
-    if (VALID_LAYOUTS.includes(raw as Layout)) return raw as Layout
-    return 'image-left-50-50'
+    if (persist) sdk.setData({ imageUrl, assetId, editorHtml, splitPct, swapped, filterState: snap })
   }
 
   function onReady(data: unknown): void {
@@ -38,7 +33,8 @@
       imageUrl?: string
       assetId?: number
       editorHtml?: string
-      layout?: unknown
+      splitPct?: number
+      swapped?: boolean
       filterState?: FilterState
     } | null
     imageUrl = d?.imageUrl ?? ''
@@ -46,7 +42,8 @@
     editorHtml =
       d?.editorHtml ??
       '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
-    layout = migrateLayout(d?.layout)
+    splitPct = typeof d?.splitPct === 'number' ? Math.min(80, Math.max(20, d.splitPct)) : 50
+    swapped = d?.swapped ?? false
     restoreFilterState(d?.filterState, sdk, (s) => {
       filterState = s
       updateBlock(false)
@@ -58,6 +55,14 @@
     assetId = asset.id
     updateBlock()
   }
+
+  function swap(): void {
+    swapped = !swapped
+    updateBlock()
+  }
+
+  let leftLabel = $derived(swapped ? 'Text' : 'Image')
+  let rightLabel = $derived(swapped ? 'Image' : 'Text')
 </script>
 
 <svelte:head>
@@ -73,20 +78,61 @@
   blockName="Image + Text"
 >
   <div class="flex flex-col gap-3">
-    <div class="flex flex-col gap-1">
-      <p class="text-xs font-semibold uppercase tracking-[0.04em] text-[#555]">Layout</p>
-      <select
-        bind:value={layout}
-        onchange={() => updateBlock()}
-        class="border border-[#ddd] rounded px-2 py-1.5 text-sm outline-none focus:border-[#0078d4] bg-white"
-      >
-        <option value="image-left-50-50">Image / text — 50/50</option>
-        <option value="text-left-50-50">Text / image — 50/50</option>
-        <option value="image-left-40-60">Image / text — 40/60</option>
-        <option value="text-left-60-40">Text / image — 60/40</option>
-        <option value="image-left-20-80">Image / text — 20/80</option>
-        <option value="text-left-80-20">Text / image — 80/20</option>
-      </select>
+    <div class="flex flex-col gap-2">
+      <p class="text-xs font-semibold uppercase tracking-[0.04em] text-[#555]">Column split</p>
+      <input
+        type="range"
+        min="20"
+        max="80"
+        step="5"
+        bind:value={splitPct}
+        oninput={() => updateBlock()}
+        class="w-full accent-[#0078d4]"
+      />
+      <!-- Split bar with swap button -->
+      <div class="relative">
+        <div class="flex rounded overflow-hidden select-none h-8 text-xs font-semibold">
+          <div
+            class="bg-[#ddd] text-[#444] flex flex-col items-center justify-center overflow-hidden transition-all"
+            style="width: {splitPct}%"
+          >
+            <span class="leading-tight">{leftLabel}</span>
+            <span class="leading-tight text-[10px] font-normal opacity-70">{splitPct}%</span>
+          </div>
+          <div
+            class="bg-[#dce8f8] text-[#0060b0] flex flex-col items-center justify-center overflow-hidden transition-all"
+            style="width: {100 - splitPct}%"
+          >
+            <span class="leading-tight">{rightLabel}</span>
+            <span class="leading-tight text-[10px] font-normal opacity-70">{100 - splitPct}%</span>
+          </div>
+        </div>
+        <!-- Swap button centered on the dividing line -->
+        <button
+          type="button"
+          onclick={swap}
+          aria-label="Swap image and text"
+          class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white border border-[#ccc] shadow flex items-center justify-center cursor-pointer hover:bg-[#f0f6ff] hover:border-[#0078d4] hover:text-[#0078d4] transition-colors z-10 text-[#555]"
+          style="left: {splitPct}%"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m16 3 4 4-4 4" />
+            <path d="M20 7H4" />
+            <path d="m8 21-4-4 4-4" />
+            <path d="M4 17h16" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="flex flex-col gap-1">
