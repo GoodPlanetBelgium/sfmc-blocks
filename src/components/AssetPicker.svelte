@@ -31,6 +31,7 @@
   let expandedIds = $state<number[]>([])
 
   const PAGE_SIZE = 24
+  const LAST_FOLDER_KEY = 'sfmc-asset-picker-last-folder'
 
   let totalPages = $derived(Math.ceil(totalCount / PAGE_SIZE))
   let expandedSet = $derived(new Set(expandedIds))
@@ -140,7 +141,8 @@
     page = 1
     search = ''
     searchInput = ''
-    const preselect = asset?.category?.id ?? null
+    const savedFolder = localStorage.getItem(LAST_FOLDER_KEY)
+    const preselect = asset?.category?.id ?? (savedFolder !== null ? Number(savedFolder) : null)
     selectedCategoryId = preselect
     selectedCategoryIds = preselect !== null ? [preselect] : null
     load()
@@ -184,6 +186,7 @@
     } else {
       const node = findNode(folderTree, id)
       selectedCategoryIds = node ? collectDescendantIds(node) : [id]
+      localStorage.setItem(LAST_FOLDER_KEY, String(id))
     }
     page = 1
     load()
