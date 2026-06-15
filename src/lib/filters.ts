@@ -26,12 +26,12 @@ const filters: Filter[] = [
     field: 'AccountRegion',
     options: [
       {
-        value: 'Flanders',
-        label: 'Flanders'
-      },
-      {
         value: 'Brussels',
         label: 'Brussels'
+      },
+      {
+        value: 'Flanders',
+        label: 'Flanders'
       },
       {
         value: 'Wallonia',
@@ -60,19 +60,19 @@ const filters: Filter[] = [
     label: 'School Type',
     field: 'AccountSchoolType',
     options: [
-      { label: 'Nursery School', value: 'Nursery_School' },
-      { label: 'Primary School', value: 'Primary_School' },
-      { label: 'Nursery & Primary School', value: 'Nursery_And_Primary_School' },
-      { label: 'Secondary School', value: 'Secondary_School' },
-      { label: 'Higher Education', value: 'Higher_Education' },
       { label: 'Adult Education', value: 'Adult_Education' },
-      { label: 'Secondary School Specialized', value: 'Secondary_School_Specialized' },
-      { label: 'Nursery School Specialized', value: 'Nursery_School_Specialized' },
-      { label: 'Primary School Specialized', value: 'Primary_School_Specialized' },
+      { label: 'Higher Education', value: 'Higher_Education' },
+      { label: 'Nursery & Primary School', value: 'Nursery_And_Primary_School' },
       {
         label: 'Nursery & Primary School Specialized',
         value: 'Nursery_And_Primary_School_Specialized'
-      }
+      },
+      { label: 'Nursery School', value: 'Nursery_School' },
+      { label: 'Nursery School Specialized', value: 'Nursery_School_Specialized' },
+      { label: 'Primary School', value: 'Primary_School' },
+      { label: 'Primary School Specialized', value: 'Primary_School_Specialized' },
+      { label: 'Secondary School', value: 'Secondary_School' },
+      { label: 'Secondary School Specialized', value: 'Secondary_School_Specialized' }
     ]
   }
 ]
