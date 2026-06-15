@@ -4,16 +4,19 @@
 
   let { value = $bindable(), onchange }: { value: FilterState; onchange?: () => void } = $props()
 
-  let open = $state(
-    filters.some((f) => (getFieldState(value, f.field)?.selectedValues.length ?? 0) > 0)
-  )
+  let open = $state(false)
+  let initialOpenApplied = false
 
   function toggleValue(field: string, val: string) {
     const current = getFieldState(value, field) ?? { selectedValues: [], includeNull: false }
     const idx = current.selectedValues.indexOf(val)
     const selectedValues =
       idx >= 0 ? current.selectedValues.filter((v) => v !== val) : [...current.selectedValues, val]
-    value = { ...value, [field]: { ...current, selectedValues } }
+    const includeNull =
+      selectedValues.length === 0
+        ? false
+        : current.includeNull || (current.selectedValues.length === 0 && selectedValues.length === 1)
+    value = { ...value, [field]: { ...current, selectedValues, includeNull } }
     onchange?.()
   }
 
@@ -62,6 +65,13 @@
   )
 
   let hasActiveFilters = $derived(activeFilters.length > 0)
+
+  $effect(() => {
+    if (!initialOpenApplied && hasActiveFilters) {
+      open = true
+      initialOpenApplied = true
+    }
+  })
 </script>
 
 <div class="border border-[#ddd] rounded text-xs">
