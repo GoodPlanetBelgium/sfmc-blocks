@@ -46,10 +46,15 @@ export function parseFilterState(html: string): FilterState {
     state[m[1]] = { selectedValues: m[2].split(','), includeNull: false }
   }
 
+  const standaloneNullRe = /\(Empty\(\[([^\]]+)\]\)\)/g
+  while ((m = standaloneNullRe.exec(html)) !== null) {
+    if (!state[m[1]]) state[m[1]] = { selectedValues: [], includeNull: true }
+  }
+
   const ifMatch = /%%\[IF \(([\s\S]+?)\) THEN\]%%/.exec(html)
   if (ifMatch) {
-    // Match "> 0) AND/OR (NOT? Empty([field])" to find operator before each non-first condition
-    const gapRe = /> 0\)\s+(AND|OR)\s+\((?:NOT\s+)?(?:IsNull|Empty)\(\[([^\]]+)\]\)/g
+    // Match after "> 0)" or "))" (end of standalone Empty) to find operator before each non-first condition
+    const gapRe = /(?:> 0\)|\)\))\s+(AND|OR)\s+\((?:NOT\s+)?(?:IsNull|Empty)\(\[([^\]]+)\]\)/g
     const operators: Record<string, 'AND' | 'OR'> = {}
     while ((m = gapRe.exec(ifMatch[1])) !== null) operators[m[2]] = m[1] as 'AND' | 'OR'
     if (Object.keys(operators).length > 0) state.operators = operators
@@ -64,7 +69,10 @@ export function stripAmpscript(html: string): string {
 
 export function buildSuperContent(html: string, filterState: FilterState): string {
   const stripped = stripAmpscript(html)
-  const hasFilters = filters.some((f) => (getFieldState(filterState, f.field)?.selectedValues.length ?? 0) > 0)
+  const hasFilters = filters.some((f) => {
+    const state = getFieldState(filterState, f.field)
+    return (state?.selectedValues.length ?? 0) > 0 || (state?.includeNull ?? false)
+  })
   if (!hasFilters) return stripped
   return `<div style="border-left:1px solid #d4001c;padding-left:1px;">${stripped}</div>`
 }
@@ -76,11 +84,16 @@ export function wrapWithFilters(html: string, filterState: FilterState): string 
 
   for (const filter of filters) {
     const state = getFieldState(filterState, filter.field)
-    if (!state || state.selectedValues.length === 0) continue
-    const vals = state.selectedValues.join(',')
-    const condition = state.includeNull
-      ? `(Empty([${filter.field}]) OR IndexOf("${vals}", [${filter.field}]) > 0)`
-      : `(NOT Empty([${filter.field}]) AND IndexOf("${vals}", [${filter.field}]) > 0)`
+    if (!state || (state.selectedValues.length === 0 && !state.includeNull)) continue
+    let condition: string
+    if (state.selectedValues.length === 0) {
+      condition = `(Empty([${filter.field}]))`
+    } else {
+      const vals = state.selectedValues.join(',')
+      condition = state.includeNull
+        ? `(Empty([${filter.field}]) OR IndexOf("${vals}", [${filter.field}]) > 0)`
+        : `(NOT Empty([${filter.field}]) AND IndexOf("${vals}", [${filter.field}]) > 0)`
+    }
     parts.push({ field: filter.field, condition })
   }
 

@@ -13,9 +13,7 @@
     const selectedValues =
       idx >= 0 ? current.selectedValues.filter((v) => v !== val) : [...current.selectedValues, val]
     const includeNull =
-      selectedValues.length === 0
-        ? false
-        : current.includeNull || (current.selectedValues.length === 0 && selectedValues.length === 1)
+      current.includeNull || (current.selectedValues.length === 0 && selectedValues.length === 1)
     value = { ...value, [field]: { ...current, selectedValues, includeNull } }
     onchange?.()
   }
@@ -61,7 +59,10 @@
   }
 
   let activeFilters = $derived(
-    filters.filter((f) => (getFieldState(value, f.field)?.selectedValues.length ?? 0) > 0)
+    filters.filter((f) => {
+      const state = getFieldState(value, f.field)
+      return (state?.selectedValues.length ?? 0) > 0 || (state?.includeNull ?? false)
+    })
   )
 
   let hasActiveFilters = $derived(activeFilters.length > 0)
@@ -158,7 +159,7 @@
               </label>
             {/each}
             <label
-              class="flex items-center gap-2 cursor-pointer text-[#888] mt-1 pt-1 border-t border-[#eee]"
+              class="flex items-center gap-2 cursor-pointer text-[#777] mt-1 pt-1 border-t border-[#eee]"
             >
               <input
                 type="checkbox"
@@ -166,7 +167,7 @@
                 onchange={() => toggleNull(filter.field)}
                 class="cursor-pointer"
               />
-              Also show when {filter.label.toLowerCase()} is unavailable
+              Show when {filter.label.toLowerCase()} is unavailable
             </label>
           </div>
         </div>
