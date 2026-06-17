@@ -36,19 +36,6 @@
   let totalPages = $derived(Math.ceil(totalCount / PAGE_SIZE))
   let expandedSet = $derived(new Set(expandedIds))
 
-  function collectDescendantIds(node: FolderNode): number[] {
-    return [node.id, ...node.children.flatMap(collectDescendantIds)]
-  }
-
-  function findNode(nodes: FolderNode[], id: number): FolderNode | null {
-    for (const n of nodes) {
-      if (n.id === id) return n
-      const found = findNode(n.children, id)
-      if (found) return found
-    }
-    return null
-  }
-
   function findPath(nodes: FolderNode[], id: number, path: number[] = []): number[] | null {
     for (const n of nodes) {
       if (n.id === id) return [...path, n.id]
@@ -126,8 +113,7 @@
 
   function applyPreselect(categoryId: number, tree: FolderNode[]) {
     selectedCategoryId = categoryId
-    const node = findNode(tree, categoryId)
-    selectedCategoryIds = node ? collectDescendantIds(node) : [categoryId]
+    selectedCategoryIds = [categoryId]
     const path = findPath(tree, categoryId)
     if (path && path.length > 1) {
       expandedIds = [...new Set([...expandedIds, ...path.slice(0, -1)])]
@@ -184,8 +170,7 @@
     if (id === null) {
       selectedCategoryIds = null
     } else {
-      const node = findNode(folderTree, id)
-      selectedCategoryIds = node ? collectDescendantIds(node) : [id]
+      selectedCategoryIds = [id]
       localStorage.setItem(LAST_FOLDER_KEY, String(id))
     }
     page = 1
