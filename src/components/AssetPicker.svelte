@@ -172,6 +172,7 @@
     } else {
       selectedCategoryIds = [id]
       localStorage.setItem(LAST_FOLDER_KEY, String(id))
+      if (!expandedSet.has(id)) expandedIds = [...expandedIds, id]
     }
     page = 1
     load()
