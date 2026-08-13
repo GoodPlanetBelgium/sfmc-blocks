@@ -32,30 +32,31 @@
     }
   })
 
+  function syncFormatState(): void {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+    let node: Node | null = sel.anchorNode
+    activeFormat = 'p'
+    while (node && node !== editorEl) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const tag = (node as Element).tagName.toLowerCase()
+        if (tag === 'h1' || tag === 'h2' || tag === 'p' || tag === 'div' || tag === 'li') {
+          if (tag === 'li') activeFormat = 'ul'
+          else activeFormat = tag === 'div' ? 'p' : tag
+          break
+        }
+      }
+      node = node.parentNode
+    }
+    isBold = document.queryCommandState('bold')
+    isItalic = document.queryCommandState('italic')
+  }
+
   $effect(() => {
     if (!editorEl) return
     document.execCommand('defaultParagraphSeparator', false, 'p')
-    const onSelectionChange = () => {
-      const sel = window.getSelection()
-      if (!sel || sel.rangeCount === 0) return
-      let node: Node | null = sel.anchorNode
-      activeFormat = 'p'
-      while (node && node !== editorEl) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const tag = (node as Element).tagName.toLowerCase()
-          if (tag === 'h1' || tag === 'h2' || tag === 'p' || tag === 'div' || tag === 'li') {
-            if (tag === 'li') activeFormat = 'ul'
-            else activeFormat = tag === 'div' ? 'p' : tag
-            break
-          }
-        }
-        node = node.parentNode
-      }
-      isBold = document.queryCommandState('bold')
-      isItalic = document.queryCommandState('italic')
-    }
-    document.addEventListener('selectionchange', onSelectionChange)
-    return () => document.removeEventListener('selectionchange', onSelectionChange)
+    document.addEventListener('selectionchange', syncFormatState)
+    return () => document.removeEventListener('selectionchange', syncFormatState)
   })
 
   function notifyChange(): void {
@@ -174,6 +175,119 @@
     convertBlocksToList()
     activeFormat = 'ul'
     notifyChange()
+  }
+
+  function closestLi(node: Node | null): HTMLLIElement | null {
+    while (node && node !== editorEl) {
+      if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === 'LI') {
+        return node as HTMLLIElement
+      }
+      node = node.parentNode
+    }
+    return null
+  }
+
+  // The list items the caret/selection covers. For a range spanning several items we keep only
+  // the outermost ones — indenting a parent already carries its nested children along.
+  function selectedListItems(): HTMLLIElement[] {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0 || !editorEl) return []
+    const range = sel.getRangeAt(0)
+    if (sel.isCollapsed) {
+      const li = closestLi(deepPoint(range.startContainer, range.startOffset)[0])
+      return li ? [li] : []
+    }
+    const items = Array.from(editorEl.querySelectorAll('li')).filter((li) =>
+      range.intersectsNode(li)
+    )
+    return items.filter((li) => !items.some((other) => other !== li && other.contains(li)))
+  }
+
+  function subListOf(li: Element): Element {
+    const last = li.lastElementChild
+    if (last && last.tagName === 'UL') return last
+    const ul = document.createElement('ul')
+    li.appendChild(ul)
+    return ul
+  }
+
+  function indentListItem(li: HTMLLIElement): boolean {
+    const prev = li.previousElementSibling
+    // The first item of a list has nothing to nest under.
+    if (!prev || prev.tagName !== 'LI') return false
+    subListOf(prev).appendChild(li)
+    return true
+  }
+
+  function outdentListItem(li: HTMLLIElement): boolean {
+    const list = li.parentElement
+    const parentLi = list?.parentElement
+    if (!list || !parentLi || parentLi.tagName !== 'LI') return false
+
+    // Items after this one stay one level deeper, hanging under the item being lifted.
+    const following: Element[] = []
+    for (let n = li.nextElementSibling; n; n = n.nextElementSibling) following.push(n)
+    if (following.length > 0) {
+      const sub = subListOf(li)
+      for (const f of following) sub.appendChild(f)
+    }
+
+    parentLi.parentNode!.insertBefore(li, parentLi.nextSibling)
+    if (list.children.length === 0) list.remove()
+    return true
+  }
+
+  // A boundary expressed as (element, childIndex) breaks once we move that child elsewhere: the
+  // index then addresses whatever slid into its place. Resolve it to the deepest node inside the
+  // addressed child instead, so the boundary travels with the list item.
+  function deepPoint(container: Node, offset: number): [Node, number] {
+    if (container.nodeType === Node.TEXT_NODE) return [container, offset]
+    const child = container.childNodes[offset]
+    if (child) {
+      let node: Node = child
+      while (node.firstChild) node = node.firstChild
+      return [node, 0]
+    }
+    const prev = container.childNodes[offset - 1]
+    if (prev) {
+      let node: Node = prev
+      while (node.lastChild) node = node.lastChild
+      return [node, node.nodeType === Node.TEXT_NODE ? (node.textContent?.length ?? 0) : 0]
+    }
+    return [container, offset]
+  }
+
+  function changeIndent(outdent: boolean): boolean {
+    const items = selectedListItems()
+    if (items.length === 0) return false
+
+    const sel = window.getSelection()!
+    const old = sel.getRangeAt(0)
+    const [startNode, startOffset] = deepPoint(old.startContainer, old.startOffset)
+    const [endNode, endOffset] = deepPoint(old.endContainer, old.endOffset)
+
+    // Outdenting bottom-up keeps each item's following siblings intact while we walk the list.
+    const ordered = outdent ? items.reverse() : items
+    let changed = false
+    for (const li of ordered) {
+      if (outdent ? outdentListItem(li) : indentListItem(li)) changed = true
+    }
+    if (changed) {
+      const range = document.createRange()
+      range.setStart(startNode, startOffset)
+      range.setEnd(endNode, endOffset)
+      sel.removeAllRanges()
+      sel.addRange(range)
+      syncFormatState()
+      notifyChange()
+    }
+    // Handled either way: inside a list Tab must never move focus out of the editor.
+    return true
+  }
+
+  function handleKeyDown(e: KeyboardEvent): void {
+    if (e.key !== 'Tab') return
+    if (changeIndent(e.shiftKey)) e.preventDefault()
   }
 
   function selectFormattingNode(tags: string[]): void {
@@ -423,6 +537,7 @@
     tabindex="0"
     class="rich-text-editor min-h-45 border border-[#ddd] rounded p-3 focus:outline-none focus:border-[#0078d4] text-sm"
     oninput={handleInput}
+    onkeydown={handleKeyDown}
     onpaste={handlePaste}
     onclick={handleEditorClick}
   ></div>
@@ -509,6 +624,13 @@
     list-style-type: disc;
     padding-left: 20px;
     margin: 6px 0;
+  }
+  :global(.rich-text-editor ul ul) {
+    list-style-type: circle;
+    margin: 2px 0;
+  }
+  :global(.rich-text-editor ul ul ul) {
+    list-style-type: square;
   }
   :global(.rich-text-editor li) {
     font-family: Verdana, Geneva, sans-serif;

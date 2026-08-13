@@ -2,7 +2,6 @@ import { namedColors } from '$lib/const'
 import { wrapWithFilters } from '$lib/filterAmpscript'
 import type { FilterState } from '$lib/filters'
 
-
 const H1_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;'
 const H2_STYLE =
@@ -80,13 +79,7 @@ function serializeRichText(editorHTML: string): string {
       parts.push(`<h2 style="${H2_STYLE}">\n ${serializeInline(el)}</h2>`)
     } else if (tag === 'ul') {
       flushBody()
-      const items = Array.from(el.children)
-        .filter((child) => child.tagName.toLowerCase() === 'li')
-        .map(
-          (li) =>
-            `  <li style="${LI_STYLE}"><span style="color:#181818;">${serializeInline(li)}</span></li>`
-        )
-      parts.push(`<ul>\n${items.join('\n')}\n</ul>`)
+      parts.push(serializeList(el))
     } else if (tag === 'p' || tag === 'div') {
       const content = serializeInline(el)
       bodyLines.push(content === '<br>' || content === '' ? '' : content)
@@ -104,6 +97,32 @@ function serializeRichText(editorHTML: string): string {
 
 function serializeInline(el: Element): string {
   return Array.from(el.childNodes).map(serializeNode).join('')
+}
+
+const LIST_MARKERS = ['disc', 'circle', 'square']
+
+function serializeList(ul: Element, depth = 0): string {
+  const marker = LIST_MARKERS[Math.min(depth, LIST_MARKERS.length - 1)]
+  const indent = '  '.repeat(depth + 1)
+  const items = Array.from(ul.children)
+    .filter((child) => child.tagName.toLowerCase() === 'li')
+    .map((li) => {
+      const isNestedList = (n: Node) =>
+        n.nodeType === Node.ELEMENT_NODE && (n as Element).tagName.toLowerCase() === 'ul'
+      const nodes = Array.from(li.childNodes)
+      const text = nodes
+        .filter((n) => !isNestedList(n))
+        .map(serializeNode)
+        .join('')
+      const sublists = nodes
+        .filter(isNestedList)
+        .map((n) => `\n${serializeList(n as Element, depth + 1)}\n${indent}`)
+        .join('')
+      return `${indent}<li style="${LI_STYLE}"><span style="color:#181818;">${text}</span>${sublists}</li>`
+    })
+  const style = `list-style-type:${marker};${depth > 0 ? 'margin:0;' : ''}`
+  const open = '  '.repeat(depth)
+  return `${open}<ul style="${style}">\n${items.join('\n')}\n${open}</ul>`
 }
 
 function serializeNode(node: Node): string {
