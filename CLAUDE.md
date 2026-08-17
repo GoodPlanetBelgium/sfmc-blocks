@@ -56,6 +56,7 @@ Image assets are fetched from SFMC's Content Builder REST API via a server-side 
 Client module: **`src/lib/sfmc-assets.ts`** — calls `/api/assets`, returns `AssetPage`. The endpoint is configured via `PUBLIC_ASSETS_ENDPOINT` env var (see below).
 
 **Important implementation details:**
+
 - The proxy uses `node:https` directly (not `fetch`) to send requests to SFMC. Node.js `fetch`/undici normalises percent-encoded characters in URLs (e.g. `%3D→=`, `%28→(`) which breaks SFMC's Simple Query parser.
 - SFMC's filter syntax uses OData-style operators: `assetType.id eq 22`, `or`, `and`, `like`. Standard `=` and `OR` return 400 "Invalid Query Format".
 - The proxy requires `SFMC_ACCOUNT_ID` (the business unit MID) in the token request body; without it SFMC returns 403 "Insufficient Privileges" on the assets endpoint.

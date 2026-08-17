@@ -15,4 +15,5 @@
   <li><a href={resolve('/divider')}>divider</a></li>
   <li><a href={resolve('/image')}>image</a></li>
   <li><a href={resolve('/image-text')}>image-text</a></li>
+  <li><a href={resolve('/columns')}>columns</a></li>
 </ul>

@@ -145,7 +145,6 @@
     sdk.getData((data: unknown) => {
       onReady(data)
     })
-
   })
 </script>
 

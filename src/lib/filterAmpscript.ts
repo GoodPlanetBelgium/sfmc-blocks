@@ -113,7 +113,9 @@ export function wrapWithFilters(html: string, filterState: FilterState): string 
       token = parts[i].condition
       i += 1
     }
-    combined = combined ? `${combined} ${operatorsMap[parts[isLeftOfGroup ? i - 2 : i - 1].field] ?? 'AND'} ${token}` : token
+    combined = combined
+      ? `${combined} ${operatorsMap[parts[isLeftOfGroup ? i - 2 : i - 1].field] ?? 'AND'} ${token}`
+      : token
   }
 
   return `%%[IF (${combined}) THEN]%%\n${html}\n%%[ENDIF]%%`

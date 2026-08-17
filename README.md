@@ -109,7 +109,13 @@ sfmc-blocks/
   }
 </script>
 
-<BlockShell storageKey="sfmc-dev-block-data:<block-name>" bind:sdk {onReady} onEditClose={updateBlock} blockName="My Block">
+<BlockShell
+  storageKey="sfmc-dev-block-data:<block-name>"
+  bind:sdk
+  {onReady}
+  onEditClose={updateBlock}
+  blockName="My Block"
+>
   <!-- editor UI here -->
   <FilterSettings bind:value={filterState} onchange={updateBlock} />
 </BlockShell>
@@ -128,7 +134,14 @@ sfmc-blocks/
 For blocks that include an image, import `AssetPicker` and `SFMCAsset`:
 
 ```svelte
-<AssetPicker value={imageUrl} onselect={(url, asset) => { imageUrl = url; assetId = asset.id; updateBlock() }} />
+<AssetPicker
+  value={imageUrl}
+  onselect={(url, asset) => {
+    imageUrl = url
+    assetId = asset.id
+    updateBlock()
+  }}
+/>
 ```
 
 See `src/routes/image/+page.svelte` as the reference implementation.

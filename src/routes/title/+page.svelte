@@ -42,7 +42,10 @@
     applyContent(sdk, html, snap)
     sdk.setData({ title: currentTitle, color, filterState: snap, blockId })
     if (flushAnchor) {
-      if (anchorDebounceTimer) { clearTimeout(anchorDebounceTimer); anchorDebounceTimer = null }
+      if (anchorDebounceTimer) {
+        clearTimeout(anchorDebounceTimer)
+        anchorDebounceTimer = null
+      }
       writeCentralData()
     } else {
       if (anchorDebounceTimer) clearTimeout(anchorDebounceTimer)
@@ -58,7 +61,12 @@
   })
 
   function onReady(data: unknown): void {
-    const d = data as { title?: string; color?: string; filterState?: FilterState; blockId?: string } | null
+    const d = data as {
+      title?: string
+      color?: string
+      filterState?: FilterState
+      blockId?: string
+    } | null
     blockId = d?.blockId ?? crypto.randomUUID()
     if (d?.title) {
       title = d.title
@@ -66,11 +74,20 @@
     } else {
       updateBlock()
     }
-    restoreFilterState(d?.filterState, sdk, (s) => { filterState = s })
+    restoreFilterState(d?.filterState, sdk, (s) => {
+      filterState = s
+    })
   }
 </script>
 
-<BlockShell storageKey="sfmc-dev-block-data:title" bind:sdk {onReady} onEditClose={() => updateBlock(true)} tabs={[]} blockName="Title">
+<BlockShell
+  storageKey="sfmc-dev-block-data:title"
+  bind:sdk
+  {onReady}
+  onEditClose={() => updateBlock(true)}
+  tabs={[]}
+  blockName="Title"
+>
   <TextInput label="Title" bind:value={title} />
   <ColorPicker bind:value={color} />
   <FilterSettings bind:value={filterState} />
