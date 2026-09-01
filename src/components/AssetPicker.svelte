@@ -398,15 +398,22 @@
                   : 'border-transparent hover:border-[#ddd]'}"
               >
                 <div
-                  class="aspect-video bg-[#f5f5f5] flex items-center justify-center overflow-hidden"
+                  class="relative aspect-video bg-[#f5f5f5] flex items-center justify-center overflow-hidden"
                 >
                   <img
                     src={asset.fileProperties.publishedURL}
                     alt={asset.name}
                     class="max-w-full max-h-full object-contain"
                   />
+                  <span
+                    class="absolute inset-x-0 bottom-0 hidden group-hover:block bg-black/75 text-white text-[10px] leading-snug px-1.5 py-1 break-words"
+                  >
+                    {asset.name}
+                  </span>
                 </div>
-                <div class="px-1.5 py-1 text-[11px] text-[#555] truncate">{asset.name}</div>
+                <div class="px-1.5 py-1 text-[11px] text-[#555] truncate" title={asset.name}>
+                  {asset.name}
+                </div>
               </button>
             {/each}
           </div>
