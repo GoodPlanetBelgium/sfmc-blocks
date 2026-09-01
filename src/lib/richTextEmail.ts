@@ -9,6 +9,11 @@ const BODY_STYLE =
 const LI_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;margin:0;mso-line-height-rule:exactly;'
 
+// Outlook classic (Word engine) ignores the bottom margin of a <ul>, so a paragraph after a list
+// sits flush against it. An mso-only spacer restores the gap without doubling it elsewhere.
+const MSO_LIST_SPACER =
+  '<!--[if mso]><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="height:14px;line-height:14px;font-size:0;">&nbsp;</td></tr></table><![endif]-->'
+
 /** Converts the contenteditable HTML of RichTextInput into email-safe, inline-styled HTML. */
 export function serializeRichText(editorHTML: string): string {
   if (!editorHTML.trim()) return ''
@@ -16,11 +21,21 @@ export function serializeRichText(editorHTML: string): string {
   const doc = parser.parseFromString(`<body>${editorHTML}</body>`, 'text/html')
   const parts: string[] = []
   const bodyLines: string[] = []
+  let pendingListSpacer = false
+
+  // Emits the Outlook spacer only once something actually follows the list.
+  function push(part: string) {
+    if (pendingListSpacer) {
+      parts.push(MSO_LIST_SPACER)
+      pendingListSpacer = false
+    }
+    parts.push(part)
+  }
 
   function flushBody() {
     while (bodyLines.length > 0 && bodyLines.at(-1) === '') bodyLines.pop()
     for (const line of bodyLines) {
-      parts.push(line === '' ? '<br>' : `<p style="${BODY_STYLE}">${line}</p>`)
+      push(line === '' ? '<br>' : `<p style="${BODY_STYLE}">${line}</p>`)
     }
     bodyLines.length = 0
   }
@@ -35,13 +50,14 @@ export function serializeRichText(editorHTML: string): string {
     const tag = el.tagName?.toLowerCase()
     if (tag === 'h1') {
       flushBody()
-      parts.push(`<h1 style="${H1_STYLE}">\n ${serializeInline(el)}</h1>`)
+      push(`<h1 style="${H1_STYLE}">\n ${serializeInline(el)}</h1>`)
     } else if (tag === 'h2') {
       flushBody()
-      parts.push(`<h2 style="${H2_STYLE}">\n ${serializeInline(el)}</h2>`)
+      push(`<h2 style="${H2_STYLE}">\n ${serializeInline(el)}</h2>`)
     } else if (tag === 'ul') {
       flushBody()
-      parts.push(serializeList(el))
+      push(serializeList(el))
+      pendingListSpacer = true
     } else if (tag === 'p' || tag === 'div') {
       const content = serializeInline(el)
       bodyLines.push(content === '<br>' || content === '' ? '' : content)
