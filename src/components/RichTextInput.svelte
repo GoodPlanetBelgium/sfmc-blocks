@@ -23,6 +23,34 @@
   let isBold = $state(false)
   let isItalic = $state(false)
   let availableAnchors = $state<AnchorEntry[]>([])
+  let wrapperEl = $state<HTMLDivElement | null>(null)
+  let sentinelEl = $state<HTMLDivElement | null>(null)
+  let isFocused = $state(false)
+  let isStuck = $state(false)
+
+  // Only the focused editor pins its toolbar: several rich-text inputs can share a screen
+  // (columns block) and stacking all their toolbars would bury the one being used.
+  let toolbarPinned = $derived(isFocused || showLinkDialog)
+
+  function handleFocusIn(): void {
+    isFocused = true
+  }
+
+  function handleFocusOut(e: FocusEvent): void {
+    const next = e.relatedTarget as Node | null
+    if (next && wrapperEl?.contains(next)) return
+    isFocused = false
+  }
+
+  // The sentinel sits just above the toolbar; once it scrolls out of view the toolbar is stuck.
+  $effect(() => {
+    if (!sentinelEl) return
+    const observer = new IntersectionObserver(([entry]) => (isStuck = !entry.isIntersecting), {
+      threshold: 1
+    })
+    observer.observe(sentinelEl)
+    return () => observer.disconnect()
+  })
 
   // Sync value → DOM when parent sets it externally (e.g. onReady). Typing does not trigger
   // this because notifyChange() keeps value === editorEl.innerHTML, so the check short-circuits.
@@ -450,8 +478,18 @@
   }
 </script>
 
-<div class="flex flex-col gap-2">
-  <div class="flex flex-wrap items-center gap-1 p-1.5 border border-[#ddd] rounded bg-[#f8f8f8]">
+<div
+  bind:this={wrapperEl}
+  class="flex flex-col gap-2"
+  onfocusin={handleFocusIn}
+  onfocusout={handleFocusOut}
+>
+  <div bind:this={sentinelEl} class="h-px -mt-px -mb-2"></div>
+  <div
+    class="flex flex-wrap items-center gap-1 p-1.5 border border-[#ddd] rounded bg-[#f8f8f8] {toolbarPinned
+      ? 'sticky top-0 z-30'
+      : ''} {toolbarPinned && isStuck ? 'shadow-md' : ''}"
+  >
     <button
       class={btnClass(activeFormat === 'h1')}
       onmousedown={(e) => e.preventDefault()}
@@ -535,7 +573,7 @@
     role="textbox"
     aria-multiline="true"
     tabindex="0"
-    class="rich-text-editor min-h-45 border border-[#ddd] rounded p-3 focus:outline-none focus:border-[#0078d4] text-sm"
+    class="rich-text-editor min-h-45 resize-y overflow-auto border border-[#ddd] rounded p-3 focus:outline-none focus:border-[#0078d4] text-sm"
     oninput={handleInput}
     onkeydown={handleKeyDown}
     onpaste={handlePaste}
