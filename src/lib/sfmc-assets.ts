@@ -85,3 +85,74 @@ export async function fetchFolders(): Promise<SFMCFolder[]> {
   const data = (await res.json()) as { items: SFMCFolder[] }
   return data.items ?? []
 }
+
+function readAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = reader.result as string
+      resolve(result.slice(result.indexOf(',') + 1))
+    }
+    reader.onerror = () => reject(new Error(`Could not read ${file.name}`))
+    reader.readAsDataURL(file)
+  })
+}
+
+export async function uploadImage(file: File, categoryId: number): Promise<SFMCAsset> {
+  const base64 = await readAsBase64(file)
+
+  const res = await fetch(`${PROXY_BASE}/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: file.name, file: base64, categoryId })
+  })
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: res.statusText }))
+    const b = body as { error?: string; detail?: string }
+    throw new Error([b.error, b.detail].filter(Boolean).join(' — ') || 'Upload failed')
+  }
+
+  return (await res.json()) as SFMCAsset
+}
+
+async function mutate(path: string, method: string, body?: unknown): Promise<unknown> {
+  const res = await fetch(`${PROXY_BASE}${path}`, {
+    method,
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined
+  })
+
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({ error: res.statusText }))
+    const p = payload as { error?: string; detail?: string }
+    throw new Error([p.error, p.detail].filter(Boolean).join(' — ') || 'Request failed')
+  }
+
+  return res.json()
+}
+
+export async function renameAsset(id: number, name: string): Promise<void> {
+  await mutate(`/assets/${id}`, 'PATCH', { name })
+}
+
+export async function deleteAsset(id: number): Promise<void> {
+  await mutate(`/assets/${id}`, 'DELETE')
+}
+
+export async function createFolder(name: string, parentId: number): Promise<SFMCFolder> {
+  const created = (await mutate('/folders', 'POST', { name, parentId })) as {
+    id: number
+    name: string
+    parentId: number
+  }
+  return { id: created.id, name: created.name, parentId: created.parentId ?? parentId }
+}
+
+export async function renameFolder(id: number, name: string): Promise<void> {
+  await mutate(`/folders/${id}`, 'PUT', { name })
+}
+
+export async function deleteFolder(id: number): Promise<void> {
+  await mutate(`/folders/${id}`, 'DELETE')
+}

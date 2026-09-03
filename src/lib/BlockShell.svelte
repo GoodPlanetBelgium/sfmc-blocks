@@ -3,6 +3,7 @@
   import { onMount } from 'svelte'
   import { page } from '$app/state'
   import BlockSDK, { type BlockSDKTab } from '$lib/blocksdk'
+  import { lookupAssetName } from '$lib/assetNames'
 
   interface Props {
     storageKey: string
@@ -25,6 +26,7 @@
   }: Props = $props()
 
   let notInIframe = $state(false)
+  let previewFrame = $state<HTMLIFrameElement | null>(null)
   let editorFrame = $state<HTMLIFrameElement | null>(null)
   let emailHTML = $state('')
   let superHTML = $state('')
@@ -36,6 +38,61 @@
   type BF = (html: string, opts?: object) => string
   let _highlighter: HL | null = null
   let _beautify: BF | null = null
+
+  // A freshly uploaded SFMC image 404s on the CDN for ~20-40s. Label it in the
+  // preview and retry on a backoff so it appears once it goes live.
+  const PREVIEW_RETRY_DELAYS = [2000, 4000, 6000, 8000, 10000, 15000, 20000, 30000]
+
+  function imageLabel(img: HTMLImageElement): string {
+    const src = img.src.split('?')[0]
+    return lookupAssetName(src) ?? (img.alt || decodeURIComponent(src.split('/').pop() ?? 'image'))
+  }
+
+  function watchPreviewImage(img: HTMLImageElement) {
+    if (img.dataset.watched) return
+    img.dataset.watched = '1'
+    const doc = img.ownerDocument
+    let note: HTMLElement | null = null
+
+    function markPending() {
+      if (note) return
+      note = doc.createElement('div')
+      note.textContent = `Processing ${imageLabel(img)}…`
+      note.style.cssText =
+        'font:12px/1.4 sans-serif;color:#999;padding:12px;text-align:center;word-break:break-all'
+      img.after(note)
+      img.style.display = 'none'
+    }
+
+    function markLoaded() {
+      note?.remove()
+      note = null
+      img.style.removeProperty('display')
+    }
+
+    function onFail() {
+      markPending()
+      const attempt = Number(img.dataset.retry ?? 0)
+      const delay = PREVIEW_RETRY_DELAYS[attempt]
+      if (delay === undefined) return
+      img.dataset.retry = String(attempt + 1)
+      const src = img.src.split('?')[0]
+      setTimeout(() => {
+        img.src = `${src}?r=${attempt + 1}`
+      }, delay)
+    }
+
+    img.addEventListener('error', onFail)
+    img.addEventListener('load', markLoaded)
+    // The image may have already failed before this ran.
+    if (img.complete && img.naturalWidth === 0) onFail()
+  }
+
+  function watchPreviewImages() {
+    const doc = previewFrame?.contentDocument
+    if (!doc) return
+    for (const img of Array.from(doc.images)) watchPreviewImage(img)
+  }
 
   async function initDevLibs() {
     const [{ createHighlighter }, { html_beautify }] = await Promise.all([
@@ -184,6 +241,8 @@
             Browser preview
           </div>
           <iframe
+            bind:this={previewFrame}
+            onload={watchPreviewImages}
             srcdoc={superHTML || emailHTML.replace(/%%[\[=][\s\S]*?[\]=]%%/g, '')}
             title="Email HTML preview"
             sandbox="allow-same-origin"
