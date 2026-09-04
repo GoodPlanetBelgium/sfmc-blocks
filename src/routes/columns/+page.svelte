@@ -25,8 +25,8 @@
   import type { SFMCAsset } from '$lib/sfmc-assets'
   import type { FilterState } from '$lib/filters'
 
-  const MAX_COLUMNS = 4
-  const COLUMN_COUNTS = [2, 3, 4]
+  const MAX_COLUMNS = 5
+  const COLUMN_COUNTS = [2, 3, 4, 5]
 
   let sdk = $state<BlockSDK | null>(null)
   let columnCount = $state(2)
