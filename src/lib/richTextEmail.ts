@@ -99,7 +99,7 @@ function serializeList(ul: Element, depth = 0): string {
         .join('')
       return `${indent}<li style="${LI_STYLE}"><span style="color:#181818;">${text}</span>${sublists}</li>`
     })
-  const style = `list-style-type:${marker};${depth > 0 ? 'margin:0;' : ''}`
+  const style = `list-style-type:${marker};margin:0;padding:0;margin-left:20px;${depth > 0 ? '' : ''}`
   const open = '  '.repeat(depth)
   return `${open}<ul style="${style}">\n${items.join('\n')}\n${open}</ul>`
 }
