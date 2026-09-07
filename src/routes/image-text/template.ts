@@ -18,7 +18,7 @@ export function buildEmailHTML(
   const imgWidth = Math.floor((imgColPct / 100) * CONTENT_WIDTH) - GUTTER
   const assetAttr = assetId != null ? ` data-assetid="${assetId}"` : ''
   const imgCell = imageUrl
-    ? `<img${assetAttr} src="${imageUrl}" alt="" width="${imgWidth}" style="display:block;width:100%;height:auto;border:0;">`
+    ? `<img${assetAttr} src="${imageUrl}" alt="" width="${imgWidth}" style="display:block;width:100%;height:auto;border:0;line-height:0;font-size:0;">`
     : `<div style="background:#f0f0f0;width:100%;aspect-ratio:1/1;min-height:120px;"></div>`
 
   const textCell = serializeRichText(editorHTML)

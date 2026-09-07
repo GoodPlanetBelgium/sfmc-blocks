@@ -24,7 +24,7 @@ export function buildEmailHTML(
   } else {
     // Constrained width with alignment - use nested table for Outlook compatibility
     img = `<img${assetAttr} src="${src}" alt="" width="${pixelWidth}" style="display: block; padding: 0px; height: auto; border: 0px transparent;">`
-    const innerTable = `<table width="${pixelWidth}" cellspacing="0" cellpadding="0" role="presentation"><tr><td>${img}</td></tr></table>`
+    const innerTable = `<table width="${pixelWidth}" cellspacing="0" cellpadding="0" role="presentation"><tr><td style="line-height: 0; font-size: 0; mso-line-height-rule: exactly;">${img}</td></tr></table>`
     table = `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="${imageAlignment}">${innerTable}</td></tr></table>`
   }
 

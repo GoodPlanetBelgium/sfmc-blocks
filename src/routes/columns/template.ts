@@ -47,5 +47,5 @@ function buildCell(column: Column, widthPct: number, gutters: number): string {
   if (!column.imageUrl)
     return `<div style="background:#f0f0f0;width:100%;aspect-ratio:1/1;min-height:120px;"></div>`
   const assetAttr = column.assetId != null ? ` data-assetid="${column.assetId}"` : ''
-  return `<img${assetAttr} src="${column.imageUrl}" alt="" width="${width}" style="display:block;width:100%;height:auto;border:0;">`
+  return `<img${assetAttr} src="${column.imageUrl}" alt="" width="${width}" style="display:block;width:100%;height:auto;border:0;line-height:0;font-size:0;">`
 }
