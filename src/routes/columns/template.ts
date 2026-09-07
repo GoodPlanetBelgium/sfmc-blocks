@@ -18,7 +18,8 @@ export function buildEmailHTML(
       : last
         ? `padding-left:${GUTTER}px;`
         : `padding-left:${GUTTER}px;padding-right:${GUTTER}px;`
-    return `    <td width="${widths[i]}%" valign="${valign}" style="${padding}vertical-align:${valign};">${buildCell(column, widths[i])}</td>`
+    const gutters = first || last ? GUTTER : GUTTER * 2
+    return `    <td width="${widths[i]}%" valign="${valign}" style="${padding}vertical-align:${valign};">${buildCell(column, widths[i], gutters)}</td>`
   })
 
   const innerHTML = `<table cellpadding="0" cellspacing="0" width="100%" role="presentation">
@@ -38,9 +39,11 @@ ${cells.join('\n')}
   return wrapWithFilters(wrapped, filterState)
 }
 
-function buildCell(column: Column, widthPct: number): string {
+function buildCell(column: Column, widthPct: number, gutters: number): string {
   if (column.type === 'text') return serializeRichText(column.editorHtml)
-  const width = Math.round((widthPct / 100) * CONTENT_WIDTH)
+  // Outlook honours the width attribute, not `width:100%`, so the images plus the gutters
+  // must never exceed CONTENT_WIDTH or the whole 600px container is forced wider.
+  const width = Math.floor((widthPct / 100) * CONTENT_WIDTH) - gutters
   if (!column.imageUrl)
     return `<div style="background:#f0f0f0;width:100%;aspect-ratio:1/1;min-height:120px;"></div>`
   const assetAttr = column.assetId != null ? ` data-assetid="${column.assetId}"` : ''

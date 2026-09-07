@@ -17,8 +17,8 @@ export interface Column {
   editorHtml: string
 }
 
-/** Usable width of the email body, used to size images inside a column. */
-export const CONTENT_WIDTH = 570
+/** Full width of the email body; a column's image is this share minus its own gutters. */
+export const CONTENT_WIDTH = 600
 /** Half-gutter applied as padding on the inner side of each column. */
 export const GUTTER = 12
 /** A column can never be squeezed below this share of the row. */
