@@ -1,6 +1,7 @@
 <script lang="ts">
   import { buildEmailHTML } from './template'
   import { applyContent, restoreFilterState } from '$lib/filterAmpscript'
+  import { cropperStore } from '$lib/cropperStore'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AssetPicker from '../../components/AssetPicker.svelte'
@@ -13,6 +14,9 @@
   let sdk = $state<BlockSDK | null>(null)
   let imageUrl = $state('')
   let assetId = $state<number | null>(null)
+  let originalAssetUrl = $state<string | null>(null)
+  let originalAssetId = $state<number | null>(null)
+  let originalCategoryId = $state<number | null>(null)
   let editorHtml = $state(
     '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
   )
@@ -26,13 +30,26 @@
     const html = buildEmailHTML(imageUrl, assetId, editorHtml, splitPct, swapped, snap)
     applyContent(sdk, html, snap)
     if (persist)
-      sdk.setData({ imageUrl, assetId, editorHtml, splitPct, swapped, filterState: snap })
+      sdk.setData({
+        imageUrl,
+        assetId,
+        originalAssetUrl,
+        originalAssetId,
+        originalCategoryId,
+        editorHtml,
+        splitPct,
+        swapped,
+        filterState: snap
+      })
   }
 
   function onReady(data: unknown): void {
     const d = data as {
       imageUrl?: string
       assetId?: number
+      originalAssetUrl?: string
+      originalAssetId?: number
+      originalCategoryId?: number
       editorHtml?: string
       splitPct?: number
       swapped?: boolean
@@ -40,6 +57,9 @@
     } | null
     imageUrl = d?.imageUrl ?? ''
     assetId = d?.assetId ?? null
+    originalAssetUrl = d?.originalAssetUrl ?? null
+    originalAssetId = d?.originalAssetId ?? null
+    originalCategoryId = d?.originalCategoryId ?? null
     editorHtml =
       d?.editorHtml ??
       '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
@@ -54,7 +74,26 @@
   function onSelect(url: string, asset: SFMCAsset): void {
     imageUrl = url
     assetId = asset.id
+    originalAssetUrl = url
+    originalAssetId = asset.id
+    originalCategoryId = asset.category?.id ?? null
     updateBlock()
+  }
+
+  function onCropApplied(url: string, newAssetId: number): void {
+    imageUrl = url
+    assetId = newAssetId
+    // Keep originalAssetUrl & originalAssetId unchanged
+    cropperStore.close()
+    updateBlock()
+  }
+
+  function openCropper(): void {
+    if (originalAssetUrl && originalCategoryId !== null) {
+      cropperStore.open(originalAssetUrl, originalCategoryId, onCropApplied, () => {
+        cropperStore.close()
+      })
+    }
   }
 
   function swap(): void {
@@ -139,6 +178,15 @@
     <div class="flex flex-col gap-1">
       <Label text="Image" />
       <AssetPicker value={imageUrl} onselect={onSelect} />
+      {#if imageUrl && originalCategoryId !== null}
+        <button
+          type="button"
+          onclick={openCropper}
+          class="px-3 py-1.5 rounded border border-[#0176d3] text-xs text-[#0176d3] hover:bg-[#e8f0fb] transition-colors cursor-pointer"
+        >
+          ✂️ Crop image
+        </button>
+      {/if}
     </div>
 
     <div class="flex flex-col gap-1">

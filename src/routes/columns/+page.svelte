@@ -1,6 +1,7 @@
 <script lang="ts">
   import { buildEmailHTML } from './template'
   import { applyContent, restoreFilterState } from '$lib/filterAmpscript'
+  import { cropperStore } from '$lib/cropperStore'
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AssetPicker from '../../components/AssetPicker.svelte'
@@ -94,7 +95,33 @@
   function onSelect(index: number, url: string, asset: SFMCAsset): void {
     columns[index].imageUrl = url
     columns[index].assetId = asset.id
+    columns[index].originalAssetUrl = url
+    columns[index].originalAssetId = asset.id
+    columns[index].originalCategoryId = asset.category?.id ?? null
     updateBlock()
+  }
+
+  function onCropApplied(index: number, url: string, newAssetId: number): void {
+    columns[index].imageUrl = url
+    columns[index].assetId = newAssetId
+    // Keep originalAssetUrl & originalAssetId unchanged
+    cropperStore.close()
+    updateBlock()
+  }
+
+  function openCropper(index: number): void {
+    const col = columns[index]
+    const categoryId = col.originalCategoryId ?? null
+    if (col.originalAssetUrl && categoryId !== null) {
+      cropperStore.open(
+        col.originalAssetUrl,
+        categoryId,
+        (url, assetId) => onCropApplied(index, url, assetId),
+        () => {
+          cropperStore.close()
+        }
+      )
+    }
   }
 
   function onDrag(index: number, boundary: number): void {
@@ -218,6 +245,15 @@
 
         {#if column.type === 'image'}
           <AssetPicker value={column.imageUrl} onselect={(url, asset) => onSelect(i, url, asset)} />
+          {#if column.imageUrl && (column.originalCategoryId ?? null) !== null}
+            <button
+              type="button"
+              onclick={() => openCropper(i)}
+              class="px-3 py-1.5 rounded border border-[#0176d3] text-xs text-[#0176d3] hover:bg-[#e8f0fb] transition-colors cursor-pointer"
+            >
+              ✂️ Crop image
+            </button>
+          {/if}
         {:else}
           <RichTextInput bind:value={columns[i].editorHtml} {sdk} onchange={updateBlock} />
         {/if}

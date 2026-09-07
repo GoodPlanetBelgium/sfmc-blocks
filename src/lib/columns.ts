@@ -14,6 +14,9 @@ export interface Column {
   type: ColumnType
   imageUrl: string
   assetId: number | null
+  originalAssetUrl?: string | null
+  originalAssetId?: number | null
+  originalCategoryId?: number | null
   editorHtml: string
 }
 

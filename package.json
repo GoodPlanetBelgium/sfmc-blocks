@@ -1,20 +1,7 @@
 {
   "name": "sfmc-blocks",
   "version": "1.0.0",
-  "description": "Custom Content Builder blocks for Salesforce Marketing Cloud — GoodPlanet Belgium",
-  "scripts": {
-    "build": "vite build && bun scripts/copy-icons.js",
-    "dev": "vite dev",
-    "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "lint": "svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier . --write"
-  },
   "author": "",
-  "license": "ISC",
-  "private": true,
-  "type": "module",
-  "packageManager": "bun",
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.0",
     "@sveltejs/kit": "^2.0.0",
@@ -29,5 +16,21 @@
     "svelte-check": "^4.4.6",
     "tailwindcss": "^4.2.4",
     "vite": "^6.0.0"
+  },
+  "description": "Custom Content Builder blocks for Salesforce Marketing Cloud — GoodPlanet Belgium",
+  "license": "ISC",
+  "packageManager": "bun",
+  "private": true,
+  "scripts": {
+    "build": "vite build && bun scripts/copy-icons.js",
+    "dev": "vite dev",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "lint": "svelte-check --tsconfig ./tsconfig.json",
+    "format": "prettier . --write"
+  },
+  "type": "module",
+  "dependencies": {
+    "cropperjs": "1.5.13"
   }
 }
