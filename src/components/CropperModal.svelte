@@ -13,6 +13,7 @@
   let imgElement = $state<HTMLImageElement | null>(null)
   let cropper = $state<Cropper | null>(null)
   let uploading = $state(false)
+  let loading = $state(false)
   let error = $state<string | null>(null)
   let blobUrl = $state<string | null>(null)
   let isProcessing = $state(false)
@@ -29,6 +30,7 @@
       // In dev: use local Vite proxy
       // In production: use goodplanet-apps sfmc-assets proxy (with CORS headers)
       if (imageUrl) {
+        loading = true
         const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
         console.log(isDev ? 'Dev mode: fetching via local proxy' : 'Production: fetching via sfmc-assets proxy')
         fetchImageViaProxy()
@@ -79,12 +81,14 @@
         console.log('Proxy image loaded, initializing cropper...')
         setTimeout(() => {
           initializeCropper()
+          loading = false
         }, 100)
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
       console.error('Proxy fetch failed:', msg)
       error = `Failed to load image: ${msg}`
+      loading = false
     }
   }
 
@@ -266,7 +270,7 @@
 
     <!-- Cropper container -->
     <div
-      class="flex-1 bg-[#f9f9f9] overflow-visible flex items-center justify-center"
+      class="flex-1 bg-[#f9f9f9] overflow-visible flex items-center justify-center relative"
       style="min-height: 400px; padding: 30px;"
     >
       <div style="width: 100%; max-width: 100%; overflow: visible;">
@@ -280,6 +284,28 @@
           style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
         />
       </div>
+
+      <!-- Loading spinner -->
+      {#if loading}
+        <div class="absolute inset-0 flex items-center justify-center bg-white/50">
+          <div class="flex flex-col items-center gap-2">
+            <svg
+              class="animate-spin w-8 h-8 text-[#0176d3]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span class="text-xs text-[#666]">Loading image...</span>
+          </div>
+        </div>
+      {/if}
     </div>
 
     <!-- Toolbar -->
