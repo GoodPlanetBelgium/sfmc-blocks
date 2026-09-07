@@ -3,6 +3,7 @@
   import 'cropperjs/dist/cropper.css'
   import { uploadImage } from '$lib/sfmc-assets'
   import { cropperStore } from '$lib/cropperStore'
+  import { PUBLIC_ASSETS_ENDPOINT } from '$env/static/public'
 
   let imageUrl = $state<string | null>(null)
   let categoryId = $state<number | null>(null)
@@ -24,10 +25,12 @@
       onApply = state.onApply
       onClose = state.onClose
 
-      // If imageUrl changed and we're in dev, fetch via proxy immediately
-      // (don't wait for onload, as CORS blocks the image load)
-      if (imageUrl && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-        console.log('Dev mode: fetching via proxy immediately')
+      // If imageUrl changed, fetch via proxy immediately
+      // In dev: use local Vite proxy
+      // In production: use goodplanet-apps sfmc-assets proxy (with CORS headers)
+      if (imageUrl) {
+        const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+        console.log(isDev ? 'Dev mode: fetching via local proxy' : 'Production: fetching via sfmc-assets proxy')
         fetchImageViaProxy()
       }
     })
@@ -48,7 +51,19 @@
   async function fetchImageViaProxy(): Promise<void> {
     if (!imageUrl) return
     try {
-      const proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
+      // Determine proxy URL based on environment
+      const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+      let proxyUrl: string
+
+      if (isDev) {
+        // Dev: use local Vite proxy
+        proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
+      } else {
+        // Production: use goodplanet-apps sfmc-assets proxy
+        const proxyBase = PUBLIC_ASSETS_ENDPOINT.replace(/\/[^/]+$/, '')
+        proxyUrl = `${proxyBase}/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+      }
+
       console.log('Fetching through proxy:', proxyUrl)
       const response = await fetch(proxyUrl)
       if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`)
