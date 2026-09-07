@@ -23,50 +23,49 @@
       categoryId = state.categoryId
       onApply = state.onApply
       onClose = state.onClose
+
+      // If imageUrl changed and we're in dev, fetch via proxy immediately
+      // (don't wait for onload, as CORS blocks the image load)
+      if (imageUrl && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        console.log('Dev mode: fetching via proxy immediately')
+        fetchImageViaProxy()
+      }
     })
     return unsubscribe
   })
 
   async function onImageLoad(): Promise<void> {
-    // Guard against re-triggering when we set the blob URL
+    console.log('onImageLoad called (production path)', { isProcessing, blobUrl, imageUrl })
     if (isProcessing || blobUrl || !imageUrl) return
 
-    isProcessing = true
-    console.log('Image loaded, fetching as blob...', { imageUrl })
+    // This fires in production when image loads with CORS
+    console.log('Production: image loaded via CORS, initializing cropper')
+    setTimeout(() => {
+      initializeCropper()
+    }, 100)
+  }
+
+  async function fetchImageViaProxy(): Promise<void> {
+    if (!imageUrl) return
     try {
-      // In dev mode, use the proxy to bypass CORS. In production, fetch directly.
-      const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-      let response: Response
-
-      if (isDev) {
-        // Dev: use Vite proxy
-        const proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
-        console.log('Dev mode: fetching from proxy:', proxyUrl)
-        response = await fetch(proxyUrl)
-      } else {
-        // Production: fetch directly from SFMC (public URL, should have CORS headers)
-        console.log('Production mode: fetching directly from SFMC')
-        response = await fetch(imageUrl, { mode: 'cors' })
-      }
-
-      if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`)
+      const proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
+      console.log('Fetching through proxy:', proxyUrl)
+      const response = await fetch(proxyUrl)
+      if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`)
       const blob = await response.blob()
-      console.log('Blob received, creating URL...')
       blobUrl = URL.createObjectURL(blob)
 
       if (imgElement) {
         imgElement.src = blobUrl
-        console.log('Image blob URL created, initializing cropper...')
+        console.log('Proxy image loaded, initializing cropper...')
         setTimeout(() => {
           initializeCropper()
         }, 100)
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      console.error('Failed to fetch image blob:', msg)
+      console.error('Proxy fetch failed:', msg)
       error = `Failed to load image: ${msg}`
-    } finally {
-      isProcessing = false
     }
   }
 
@@ -257,6 +256,7 @@
           bind:this={imgElement}
           src={imageUrl}
           alt="Image to crop"
+          crossorigin="anonymous"
           onload={onImageLoad}
           style="max-width: 100%; height: auto; display: block; margin: 0 auto;"
         />
