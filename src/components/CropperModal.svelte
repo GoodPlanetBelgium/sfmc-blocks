@@ -60,8 +60,10 @@
         proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
       } else {
         // Production: use goodplanet-apps sfmc-assets proxy
-        const proxyBase = PUBLIC_ASSETS_ENDPOINT.replace(/\/[^/]+$/, '')
-        proxyUrl = `${proxyBase}/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+        // PUBLIC_ASSETS_ENDPOINT = https://sfmc-auth.goodplanet.be/api/assets
+        // We need: https://sfmc-auth.goodplanet.be/api/proxy-image
+        const endpointUrl = new URL(PUBLIC_ASSETS_ENDPOINT)
+        proxyUrl = `${endpointUrl.origin}/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
       }
 
       console.log('Fetching through proxy:', proxyUrl)
