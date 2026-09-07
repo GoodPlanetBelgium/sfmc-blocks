@@ -32,12 +32,23 @@
     if (isProcessing || blobUrl || !imageUrl) return
 
     isProcessing = true
-    console.log('Image loaded, fetching as blob via proxy...', { imageUrl })
+    console.log('Image loaded, fetching as blob...', { imageUrl })
     try {
-      // Fetch the image via the Vite proxy to bypass CORS restrictions
-      const proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
-      console.log('Fetching from proxy:', proxyUrl)
-      const response = await fetch(proxyUrl)
+      // In dev mode, use the proxy to bypass CORS. In production, fetch directly.
+      const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+      let response: Response
+
+      if (isDev) {
+        // Dev: use Vite proxy
+        const proxyUrl = `/proxy-image?url=${encodeURIComponent(imageUrl)}`
+        console.log('Dev mode: fetching from proxy:', proxyUrl)
+        response = await fetch(proxyUrl)
+      } else {
+        // Production: fetch directly from SFMC (public URL, should have CORS headers)
+        console.log('Production mode: fetching directly from SFMC')
+        response = await fetch(imageUrl, { mode: 'cors' })
+      }
+
       if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`)
       const blob = await response.blob()
       console.log('Blob received, creating URL...')
