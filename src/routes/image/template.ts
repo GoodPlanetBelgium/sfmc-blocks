@@ -20,12 +20,12 @@ export function buildEmailHTML(
   if (imageWidth === 100) {
     // Full width - simple structure for Outlook classic
     img = `<img${assetAttr} src="${src}" alt="" width="600" style="display: block; padding: 0px; text-align: center; height: auto; width: 100%; border: 0px transparent;">`
-    table = `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="center">${img}</td></tr></table>`
+    table = `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="center" style="line-height: 0; font-size: 0; mso-line-height-rule: exactly;">${img}</td></tr></table>`
   } else {
     // Constrained width with alignment - use nested table for Outlook compatibility
     img = `<img${assetAttr} src="${src}" alt="" width="${pixelWidth}" style="display: block; padding: 0px; height: auto; border: 0px transparent;">`
     const innerTable = `<table width="${pixelWidth}" cellspacing="0" cellpadding="0" role="presentation"><tr><td style="line-height: 0; font-size: 0; mso-line-height-rule: exactly;">${img}</td></tr></table>`
-    table = `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="${imageAlignment}">${innerTable}</td></tr></table>`
+    table = `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="${imageAlignment}" style="line-height: 0; font-size: 0; mso-line-height-rule: exactly;">${innerTable}</td></tr></table>`
   }
 
   return wrapWithFilters(table, filterState)
