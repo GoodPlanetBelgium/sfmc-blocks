@@ -1,13 +1,13 @@
 import { namedColors } from '$lib/const'
 
 const H1_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;text-align:left;'
 const H2_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:16px;font-style:normal;font-weight:bold;line-height:1.4;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:16px;font-style:normal;font-weight:bold;line-height:1.4;text-align:left;'
 const BODY_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;margin:0 0 1em 0;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;text-align:left;margin:0 0 1em 0;'
 const LI_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;margin:0;mso-line-height-rule:exactly;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;text-align:left;margin:0;mso-line-height-rule:exactly;'
 
 // Outlook classic (Word engine) ignores the bottom margin of a <ul>, so a paragraph after a list
 // sits flush against it. An mso-only spacer restores the gap without doubling it elsewhere.
