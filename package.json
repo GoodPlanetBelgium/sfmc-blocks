@@ -22,7 +22,7 @@
   "packageManager": "bun",
   "private": true,
   "scripts": {
-    "build": "vite build && bun scripts/copy-icons.js",
+    "build": "vite build && bun scripts/copy-icons.js && bun scripts/copy-footers.js",
     "dev": "vite dev",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

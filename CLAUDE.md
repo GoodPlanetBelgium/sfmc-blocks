@@ -51,9 +51,14 @@ No test suite exists. Type-check with `bun run check` before committing.
 Image assets are fetched from SFMC's Content Builder REST API via a server-side proxy in the `goodplanet-apps` monorepo (`apps/sfmc-assets`), deployed at `https://sfmc-auth.goodplanet.be`.
 
 - `GET /api/assets?page=&pageSize=&search=` — returns paginated SFMC image assets
-- `POST /api/token` — returns a short-lived SFMC access token (used by `AssetPicker` indirectly; assets proxy handles auth internally)
+- `PATCH`/`DELETE /api/assets/[id]` — rename or delete an image asset
+- `GET`/`POST /api/folders`, `PUT`/`DELETE /api/folders/[id]` — list, create, rename or delete Content Builder folders
+- `POST /api/upload` — upload an image asset
+- `GET /api/proxy-image?url=` — fetches an SFMC image server-side for the cropper (`CropperModal.svelte`)
 
-Client module: **`src/lib/sfmc-assets.ts`** — calls `/api/assets`, returns `AssetPage`. The endpoint is configured via `PUBLIC_ASSETS_ENDPOINT` env var (see below).
+The proxy gets its own SFMC token per request (`apps/sfmc-assets/lib/sfmcToken.ts`); the blocks never see one. Every route is guarded only by an `Origin` allowlist, which browsers enforce but any non-browser client can fake, so the write routes are effectively unauthenticated.
+
+Client module: **`src/lib/sfmc-assets.ts`** — calls the routes above, relative to `PUBLIC_ASSETS_ENDPOINT` (see below).
 
 **Important implementation details:**
 
@@ -61,6 +66,12 @@ Client module: **`src/lib/sfmc-assets.ts`** — calls `/api/assets`, returns `As
 - SFMC's filter syntax uses OData-style operators: `assetType.id eq 22`, `or`, `and`, `like`. Standard `=` and `OR` return 400 "Invalid Query Format".
 - The proxy requires `SFMC_ACCOUNT_ID` (the business unit MID) in the token request body; without it SFMC returns 403 "Insufficient Privileges" on the assets endpoint.
 - `category.id eq X` filtering is **not supported** by SFMC's Simple Query: a category-only filter returns 403, and combining it with `and assetType.id eq Y` silently returns 0 results. Folder browsing in the asset picker works by fetching all type-matching assets and filtering by category server-side in the proxy (`apps/sfmc-assets/pages/api/assets.ts → fetchAllByType`).
+
+## Email footers
+
+`etc/smfc-email-footer.html` (commercial) and `etc/smfc-email-footer-transactional.html` (no unsubscribe link) are the source of truth for the footer SFMC adds to every email. It is not part of the email assets or the template. The footer picks its texts and privacy policy link from the subscriber's `Language` attribute (falling back to `Language__c`, then `C_Language__c`): NL, FR, or English when empty. After changing a file here, update the copy in SFMC by hand.
+
+The build publishes both to `dist/footers/` (`scripts/copy-footers.js`, after `copy-icons.js`, which would otherwise put icons in that folder too), so they're served at `https://goodplanetbelgium.github.io/sfmc-blocks/footers/<file>`. The email renderer in `goodplanet-apps` (`apps/sfmc-assets`, `GET /api/emails/[id]`) reads them from there to show sent emails in Salesforce, and evaluates their AMPscript itself (`lib/ampscript.ts`). It supports only what the footers use now, so new AMPscript functions in a footer need support there too; its tests run against these files.
 
 ## Environment variables
 
