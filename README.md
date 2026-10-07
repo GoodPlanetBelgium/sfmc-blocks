@@ -188,5 +188,5 @@ The workflow reads the GitHub Pages base path via `actions/configure-pages` and 
 ### First-time setup
 
 1. **Settings → Pages** → Source: **GitHub Actions** → Save
-2. **Settings → Secrets and variables → Actions → Variables** → add `PUBLIC_ASSETS_ENDPOINT = https://sfmc-auth.goodplanet.be/api/assets`
+2. **Settings → Secrets and variables → Actions → Variables** → add `PUBLIC_ASSETS_ENDPOINT = https://sfmc-assets.goodplanet.be/api/assets`
 3. Push to `main` — the first Action run will publish the site

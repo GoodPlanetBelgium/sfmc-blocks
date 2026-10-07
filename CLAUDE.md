@@ -48,7 +48,7 @@ No test suite exists. Type-check with `bun run check` before committing.
 
 ## SFMC asset picker infrastructure
 
-Image assets are fetched from SFMC's Content Builder REST API via a server-side proxy in the `goodplanet-apps` monorepo (`apps/sfmc-assets`), deployed at `https://sfmc-auth.goodplanet.be`.
+Image assets are fetched from SFMC's Content Builder REST API via a server-side proxy in the `goodplanet-apps` monorepo (`apps/sfmc-assets`), deployed at `https://sfmc-assets.goodplanet.be`.
 
 - `GET /api/assets?page=&pageSize=&search=` — returns paginated SFMC image assets
 - `PATCH`/`DELETE /api/assets/[id]` — rename or delete an image asset
@@ -83,7 +83,7 @@ PUBLIC_ASSETS_ENDPOINT=http://localhost:3004/api/assets
 
 The local proxy runs via `pnpm dev` in the `goodplanet-apps` monorepo (`apps/sfmc-assets`, port 3004).
 
-For production builds, `PUBLIC_ASSETS_ENDPOINT` is injected by GitHub Actions from a repository variable (`vars.PUBLIC_ASSETS_ENDPOINT = https://sfmc-auth.goodplanet.be/api/assets`).
+For production builds, `PUBLIC_ASSETS_ENDPOINT` is injected by GitHub Actions from a repository variable (`vars.PUBLIC_ASSETS_ENDPOINT = https://sfmc-assets.goodplanet.be/api/assets`).
 
 ## Adding a new block
 
