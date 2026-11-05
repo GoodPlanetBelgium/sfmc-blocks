@@ -158,6 +158,6 @@ function toHex(color: string): string {
     : color
 }
 
-function encodeEntities(text: string): string {
+export function encodeEntities(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }

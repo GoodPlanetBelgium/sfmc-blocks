@@ -5,6 +5,7 @@
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AssetPicker from '../../components/AssetPicker.svelte'
+  import TextInput from '../../components/TextInput.svelte'
   import type BlockSDK from '$lib/blocksdk'
   import type { SFMCAsset } from '$lib/sfmc-assets'
   import type { FilterState } from '$lib/filters'
@@ -18,11 +19,12 @@
   let filterState = $state<FilterState>({})
   let imageWidth = $state(100)
   let imageAlignment = $state<'left' | 'center' | 'right'>('center')
+  let caption = $state('')
 
   function updateBlock(persist = true): void {
     if (!sdk) return
     const snap = $state.snapshot(filterState) as FilterState
-    const html = buildEmailHTML(imageUrl, assetId, imageWidth, imageAlignment, snap)
+    const html = buildEmailHTML(imageUrl, assetId, imageWidth, imageAlignment, caption, snap)
     applyContent(sdk, html, snap)
     if (persist) {
       sdk.setData({
@@ -33,6 +35,7 @@
         originalCategoryId,
         imageWidth,
         imageAlignment,
+        caption,
         filterState: snap
       })
     }
@@ -47,6 +50,7 @@
       originalCategoryId?: number
       imageWidth?: number
       imageAlignment?: 'left' | 'center' | 'right'
+      caption?: string
       filterState?: FilterState
     } | null
     imageUrl = d?.imageUrl ?? ''
@@ -56,6 +60,7 @@
     originalCategoryId = d?.originalCategoryId ?? null
     imageWidth = d?.imageWidth ?? 100
     imageAlignment = d?.imageAlignment ?? 'center'
+    caption = d?.caption ?? ''
     restoreFilterState(d?.filterState, sdk, (s) => {
       filterState = s
       updateBlock(false)
@@ -165,6 +170,13 @@
             </div>
           </fieldset>
         {/if}
+
+        <TextInput
+          label="Caption"
+          placeholder="Optional"
+          bind:value={caption}
+          onchange={updateBlock}
+        />
       </div>
     {/if}
 

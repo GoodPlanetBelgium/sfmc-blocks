@@ -5,9 +5,10 @@
     label: string
     placeholder?: string
     value: string
+    onchange?: () => void
   }
 
-  let { label, placeholder, value = $bindable() }: Props = $props()
+  let { label, placeholder, value = $bindable(), onchange }: Props = $props()
 </script>
 
 <div class="flex flex-col gap-1">
@@ -15,6 +16,7 @@
   <input
     type="text"
     bind:value
+    oninput={() => onchange?.()}
     placeholder={placeholder ?? label}
     class="w-full px-2.5 py-2 border border-[#d0d0d0] rounded text-sm outline-none focus:border-[#0078d4]"
   />
