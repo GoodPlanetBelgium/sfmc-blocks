@@ -17,6 +17,7 @@ export interface Column {
   originalAssetUrl?: string | null
   originalAssetId?: number | null
   originalCategoryId?: number | null
+  caption: string
   editorHtml: string
 }
 
@@ -31,7 +32,7 @@ export const DEFAULT_TEXT =
   '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
 
 export function createColumn(type: ColumnType): Column {
-  return { type, imageUrl: '', assetId: null, editorHtml: DEFAULT_TEXT }
+  return { type, imageUrl: '', assetId: null, caption: '', editorHtml: DEFAULT_TEXT }
 }
 
 /** Even split, remainder handed to the leftmost columns: 2 → [50,50], 3 → [34,33,33]. */

@@ -1,10 +1,6 @@
 import { wrapWithFilters } from '$lib/filterAmpscript'
-import { encodeEntities } from '$lib/richTextEmail'
+import { captionRow as buildCaptionRow } from '$lib/caption'
 import type { FilterState } from '$lib/filters'
-
-// Explicit px line-height: the image cells around it set line-height 0 with mso-line-height-rule.
-const CAPTION_STYLE =
-  'color:#666666;font-family:Verdana,Geneva,sans-serif;font-size:12px;font-style:normal;line-height:17px;mso-line-height-rule:exactly;padding:6px 0 12px 0;text-align:left;'
 
 export function buildEmailHTML(
   src: string,
@@ -16,10 +12,7 @@ export function buildEmailHTML(
 ): string {
   if (!src) return ''
   const assetAttr = assetId != null ? ` data-assetid="${assetId}"` : ''
-  const captionText = caption.trim()
-  const captionRow = captionText
-    ? `<tr><td style="${CAPTION_STYLE}">${encodeEntities(captionText)}</td></tr>`
-    : ''
+  const captionRow = buildCaptionRow(caption)
 
   // Calculate pixel width at 600px container
   const pixelWidth = Math.round((imageWidth / 100) * 600)

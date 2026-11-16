@@ -3,6 +3,7 @@ import { serializeRichText } from '$lib/richTextEmail'
 import type { FilterState } from '$lib/filters'
 import type { Column, VerticalAlign } from '$lib/columns'
 import { CONTENT_WIDTH, GUTTER } from '$lib/columns'
+import { withCaption } from '$lib/caption'
 
 export function buildEmailHTML(
   columns: Column[],
@@ -47,5 +48,8 @@ function buildCell(column: Column, widthPct: number, gutters: number): string {
   if (!column.imageUrl)
     return `<div style="background:#f0f0f0;width:100%;aspect-ratio:1/1;min-height:120px;"></div>`
   const assetAttr = column.assetId != null ? ` data-assetid="${column.assetId}"` : ''
-  return `<img${assetAttr} src="${column.imageUrl}" alt="" width="${width}" style="display:block;width:100%;height:auto;border:0;line-height:0;font-size:0;">`
+  return withCaption(
+    `<img${assetAttr} src="${column.imageUrl}" alt="" width="${width}" style="display:block;width:100%;height:auto;border:0;line-height:0;font-size:0;">`,
+    column.caption
+  )
 }

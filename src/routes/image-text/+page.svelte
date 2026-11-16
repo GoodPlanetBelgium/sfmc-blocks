@@ -6,6 +6,7 @@
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AssetPicker from '../../components/AssetPicker.svelte'
   import RichTextInput from '../../components/RichTextInput.svelte'
+  import CaptionInput from '../../components/CaptionInput.svelte'
   import Label from '../../components/Label.svelte'
   import type BlockSDK from '$lib/blocksdk'
   import type { SFMCAsset } from '$lib/sfmc-assets'
@@ -22,12 +23,13 @@
   )
   let splitPct = $state(50)
   let swapped = $state(false)
+  let caption = $state('')
   let filterState = $state<FilterState>({})
 
   function updateBlock(persist = true): void {
     if (!sdk) return
     const snap = $state.snapshot(filterState) as FilterState
-    const html = buildEmailHTML(imageUrl, assetId, editorHtml, splitPct, swapped, snap)
+    const html = buildEmailHTML(imageUrl, assetId, editorHtml, splitPct, swapped, caption, snap)
     applyContent(sdk, html, snap)
     if (persist)
       sdk.setData({
@@ -39,6 +41,7 @@
         editorHtml,
         splitPct,
         swapped,
+        caption,
         filterState: snap
       })
   }
@@ -53,6 +56,7 @@
       editorHtml?: string
       splitPct?: number
       swapped?: boolean
+      caption?: string
       filterState?: FilterState
     } | null
     imageUrl = d?.imageUrl ?? ''
@@ -65,6 +69,7 @@
       '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>'
     splitPct = typeof d?.splitPct === 'number' ? Math.min(80, Math.max(20, d.splitPct)) : 50
     swapped = d?.swapped ?? false
+    caption = d?.caption ?? ''
     restoreFilterState(d?.filterState, sdk, (s) => {
       filterState = s
       updateBlock(false)
@@ -186,6 +191,9 @@
         >
           ✂️ Crop image
         </button>
+      {/if}
+      {#if imageUrl}
+        <CaptionInput bind:value={caption} onchange={updateBlock} />
       {/if}
     </div>
 

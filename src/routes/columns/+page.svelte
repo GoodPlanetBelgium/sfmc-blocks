@@ -9,6 +9,7 @@
   import ButtonGroup from '../../components/ButtonGroup.svelte'
   import MultiRangeSlider from '../../components/MultiRangeSlider.svelte'
   import Label from '../../components/Label.svelte'
+  import CaptionInput from '../../components/CaptionInput.svelte'
   import {
     boundaries,
     boundaryRange,
@@ -70,6 +71,10 @@
         type: saved.type === 'image' ? 'image' : 'text',
         imageUrl: saved.imageUrl ?? '',
         assetId: saved.assetId ?? null,
+        originalAssetUrl: saved.originalAssetUrl ?? null,
+        originalAssetId: saved.originalAssetId ?? null,
+        originalCategoryId: saved.originalCategoryId ?? null,
+        caption: saved.caption ?? '',
         editorHtml: saved.editorHtml ?? fallback.editorHtml
       }
     })
@@ -253,6 +258,9 @@
             >
               ✂️ Crop image
             </button>
+          {/if}
+          {#if column.imageUrl}
+            <CaptionInput bind:value={columns[i].caption} onchange={updateBlock} />
           {/if}
         {:else}
           <RichTextInput bind:value={columns[i].editorHtml} {sdk} onchange={updateBlock} />

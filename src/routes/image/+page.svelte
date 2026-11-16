@@ -5,7 +5,7 @@
   import BlockShell from '$lib/BlockShell.svelte'
   import FilterSettings from '../../components/FilterSettings.svelte'
   import AssetPicker from '../../components/AssetPicker.svelte'
-  import TextInput from '../../components/TextInput.svelte'
+  import CaptionInput from '../../components/CaptionInput.svelte'
   import type BlockSDK from '$lib/blocksdk'
   import type { SFMCAsset } from '$lib/sfmc-assets'
   import type { FilterState } from '$lib/filters'
@@ -171,12 +171,7 @@
           </fieldset>
         {/if}
 
-        <TextInput
-          label="Caption"
-          placeholder="Optional"
-          bind:value={caption}
-          onchange={updateBlock}
-        />
+        <CaptionInput bind:value={caption} onchange={updateBlock} />
       </div>
     {/if}
 
