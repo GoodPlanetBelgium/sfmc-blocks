@@ -10,5 +10,5 @@ export function buildEmailInnerHTML(editorHTML: string): string {
 export function buildEmailHTML(editorHTML: string, filterState: FilterState = {}): string {
   const innerHTML = buildEmailInnerHTML(editorHTML)
   if (!innerHTML) return ''
-  return wrapWithFilters(defaultTemplate({ innerHTML, padding: '0' }), filterState)
+  return wrapWithFilters(defaultTemplate({ innerHTML }), filterState)
 }

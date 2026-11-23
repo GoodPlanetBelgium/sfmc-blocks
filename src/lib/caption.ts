@@ -7,12 +7,12 @@ const CAPTION_STYLE =
 
 /**
  * Table row holding the caption, to append under the image's row; '' when the caption is blank.
- * `bottom` is the space under the caption: 0 where the block already adds space below.
+ * No space under it: the padding of the block it is in is the space below.
  */
-export function captionRow(caption: string | undefined, bottom = 12): string {
+export function captionRow(caption: string | undefined): string {
   const text = caption?.trim()
   return text
-    ? `<tr><td style="${CAPTION_STYLE}padding:6px 0 ${bottom}px 0;">${encodeEntities(text)}</td></tr>`
+    ? `<tr><td style="${CAPTION_STYLE}padding:6px 0 0 0;">${encodeEntities(text)}</td></tr>`
     : ''
 }
 

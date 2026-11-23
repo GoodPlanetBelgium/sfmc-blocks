@@ -1,11 +1,14 @@
 import defaultTemplate from '$lib/defaultTemplate'
 import filterDefs, { getFieldState } from '$lib/filters'
 import { buildEmailInnerHTML } from '../rich-text/template'
+import { spacer } from '$lib/richTextEmail'
 import type { FilterState, FilterFieldState, Filter } from '$lib/filters'
 
-// The browser defaults (1em above and below, 40px indent) made explicit, for Outlook classic.
-// The indent is a margin, as Outlook ignores padding on a list.
-const LIST_STYLE = 'margin:14px 0 14px 40px;padding:0;'
+// No margin above or below: the block's padding is the space around it, and a spacer separates
+// it from the intro text. The indent is a margin, as Outlook classic ignores padding on a list.
+const LIST_STYLE = 'margin:0 0 0 40px;padding:0;'
+/** Space between the intro text and the list, as under a paragraph. */
+const INTRO_GAP = 14
 
 export type ContentTableItem = {
   title: string
@@ -71,7 +74,7 @@ export function buildSuperHTML(items: ContentTableItem[], richTextHtml = ''): st
     })
     .join('\n')
   const listHTML = `<ul style="${LIST_STYLE}">\n${listItems}\n</ul>`
-  const innerHTML = introHTML ? `${introHTML}\n${listHTML}` : listHTML
+  const innerHTML = introHTML ? `${introHTML}\n${spacer(INTRO_GAP)}\n${listHTML}` : listHTML
   return defaultTemplate({ innerHTML })
 }
 
@@ -89,6 +92,6 @@ export function buildEmailHTML(items: ContentTableItem[], richTextHtml = ''): st
     })
     .join('\n')
   const listHTML = `<ul style="${LIST_STYLE}">\n${listItems}\n</ul>`
-  const innerHTML = introHTML ? `${introHTML}\n${listHTML}` : listHTML
+  const innerHTML = introHTML ? `${introHTML}\n${spacer(INTRO_GAP)}\n${listHTML}` : listHTML
   return defaultTemplate({ innerHTML })
 }

@@ -12,8 +12,7 @@ export function buildEmailHTML(
 ): string {
   if (!src) return ''
   const assetAttr = assetId != null ? ` data-assetid="${assetId}"` : ''
-  // No space under the caption: the block's own 15px below (see the end) covers it.
-  const captionRow = buildCaptionRow(caption, 0)
+  const captionRow = buildCaptionRow(caption)
 
   // Calculate pixel width at 600px container
   const pixelWidth = Math.round((imageWidth / 100) * 600)
@@ -32,9 +31,10 @@ export function buildEmailHTML(
     table = `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td align="${imageAlignment}" style="line-height: 0; font-size: 0; mso-line-height-rule: exactly;">${innerTable}</td></tr></table>`
   }
 
-  // 15px under the image, as under a title block. Cell padding, so Outlook classic applies it too.
+  // 12px above and below, as every block has: any two blocks are 24px apart. Cell padding, so
+  // Outlook classic applies it too.
   return wrapWithFilters(
-    `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td style="padding:0 0 15px 0;">${table}</td></tr></table>`,
+    `<table width="100%" cellspacing="0" cellpadding="0" role="presentation"><tr><td style="padding:12px 0;">${table}</td></tr></table>`,
     filterState
   )
 }

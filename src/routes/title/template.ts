@@ -8,8 +8,8 @@ export function buildEmailHTML(
   color: string,
   filterState: FilterState = {}
 ): string {
-  // The colored box sits in a cell with 15px under it: the space between the title and what
-  // follows, as text blocks have no top margin. Cell padding, so Outlook classic applies it too.
+  // 12px above and below, as every block has: any two blocks are 24px apart. Cell padding, so
+  // Outlook classic applies it too.
   const box = defaultTemplate({
     padding: '5px 20px',
     bgColor: color,
@@ -34,7 +34,7 @@ export function buildEmailHTML(
 `
   })
   return wrapWithFilters(
-    `<table cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr><td style="padding:0 0 15px 0;">${box}</td></tr></table>`,
+    `<table cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr><td style="padding:12px 0;">${box}</td></tr></table>`,
     filterState
   )
 }
