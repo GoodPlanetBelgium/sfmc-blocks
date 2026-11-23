@@ -15,9 +15,9 @@ export function buildEmailHTML(
       innerHTML: `
       <a id="${anchor}" name="${anchor}"></a>
       <!--[if mso]>
-      <table role="presentation" border="0" cellpadding="12" cellspacing="0" width="100%">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr>
-      <td style="color:#181818;font-family:Verdana, Geneva, sans-serif;font-size:23px;font-weight:bold;line-height:1.5;mso-line-height-rule:exactly;">
+      <td style="padding:15px 0;color:#181818;font-family:Verdana, Geneva, sans-serif;font-size:23px;font-weight:bold;line-height:1.5;mso-line-height-rule:exactly;">
       <span style="color:#ffffff;">${title}</span>
       </td>
       </tr>
@@ -26,7 +26,7 @@ export function buildEmailHTML(
 
       <!--[if !mso]><!-- -->
       <h1
-        style="color:#181818;font-family:Verdana, Geneva, sans-serif;font-size:23px;font-style:normal;font-weight:bold;line-height:150%;">
+        style="color:#181818;font-family:Verdana, Geneva, sans-serif;font-size:23px;font-style:normal;font-weight:bold;line-height:150%;margin:15px 0;">
         <span style="color:#ffffff;">${title}</span>
       </h1>
       <!--<![endif]-->

@@ -10,11 +10,12 @@ export function buildEmailHTML(
   filterState: FilterState = {}
 ): string {
   const hrefUrl = url.replace(/"/g, "'")
+  // The spacing is cell padding, not a margin on a wrapping <div>: Outlook classic (Word engine)
+  // doesn't apply div margins the way browsers do, so stacked buttons were spaced differently.
   const html = `
-<div style="margin:20px 0px;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
     <tr>
-      <td align="center">
+      <td align="center" style="padding:20px 0px;">
         <table border="0" cellspacing="0" cellpadding="0" role="presentation">
           <tr>
             <td>
@@ -37,7 +38,6 @@ export function buildEmailHTML(
       </td>
     </tr>
   </table>
-</div>
 `
   return wrapWithFilters(html, filterState)
 }

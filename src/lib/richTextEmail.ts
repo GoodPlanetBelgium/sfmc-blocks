@@ -1,11 +1,13 @@
 import { namedColors } from '$lib/const'
 
+// Margins are explicit px. Outlook classic (Word engine) doesn't give headings the browser's default
+// margins (0.67em for h1, 0.83em for h2), so a heading right under a title block stuck to it.
 const H1_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;text-align:left;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:22px;font-style:normal;font-weight:bold;line-height:1.5;text-align:left;margin:15px 0;'
 const H2_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:16px;font-style:normal;font-weight:bold;line-height:1.4;text-align:left;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:16px;font-style:normal;font-weight:bold;line-height:1.4;text-align:left;margin:13px 0;'
 const BODY_STYLE =
-  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;text-align:left;margin:0 0 1em 0;'
+  'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;text-align:left;margin:0 0 14px 0;'
 const LI_STYLE =
   'color:#181818;font-family:Verdana,Geneva,sans-serif;font-size:14px;font-style:normal;line-height:1.4;text-align:left;margin:0;mso-line-height-rule:exactly;'
 
